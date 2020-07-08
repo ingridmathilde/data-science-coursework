@@ -13,6 +13,21 @@ reading: 10
 
 *Topics*: Staging, committing, pushing
 
+# Configure RStudio to use git
+<!-- -------------------------------------------------- -->
+
+This exercise introduces the *graphical* interface for git through RStudio. To
+use this interface, you'll need to click `Tools -> Global Options -> Git/SVN`.
+If *Git executable* shows (none), click *Browse* and selec tthe git executable
+installed on your system.
+
+- On Mac / Linux you can use `which git` from your command line
+- On Windows `git.exe` is probably somewhere in `Program Files`
+
+See [these
+notes](https://jennybc.github.io/2014-05-12-ubc/ubc-r/session03_git.html) for
+more info.
+
 # Set Up Your Repository
 <!-- -------------------------------------------------- -->
 
@@ -47,7 +62,4 @@ __q3__ Click the `push` button (green upward arrow, highlighted below) to push y
 ![New](./images/rep03-push.png)
 Now you have a backup copy of your work in GitHub, and you can easily share your work by sharing a link to your repository!
 
-# Exit Ticket
-<!-- -------------------------------------------------- -->
-
-Once you have completed this exercise, make sure to fill out the **exit ticket survey**, [linked here](https://docs.google.com/forms/d/e/1FAIpQLSeuq2LFIwWcm05e8-JU84A3irdEL7JkXhMq5Xtoalib36LFHw/viewform?usp=pp_url&entry.693978880=e-rep03-track.Rmd).
+<!-- include-exit-ticket -->
