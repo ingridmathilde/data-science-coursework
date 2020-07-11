@@ -57,53 +57,22 @@ __q1__ Create a plot of `price` vs `carat` of the `diamonds` dataset below. Docu
 ```{r q1-task}
 ## TASK: Plot `price` vs `carat` below
 ## Your code here!
-ggplot(diamonds, aes(x = carat, y = price)) + geom_point()
 ```
 
 **Observations**:
 
-Lowest carat diamonds (<0.5) will not be prices at more than $5000, while highest carat diamonds (>3.0) can be priced between $7500 to over $175000. There seems to be covariability between carat and price with several outliers.  
+- (Write your observations here!)
 
 __q2__ Create a visualization showing variables `carat`, `price`, and `cut` simultaneously. Experiment with which variable you assign to which aesthetic (`x`, `y`, etc.) to find an effective visual.
 
 ```{r q2-task}
 ## TASK: Plot `price`, `carat`, and `cut` below
 ## Your code here!
-plot_point <- diamonds %>% 
-  ggplot(aes(x = carat, y = price, color = cut)) +
-  geom_point()
-
-plot_smooth <- diamonds %>% 
-  ggplot(aes(x = carat, y = price, color = cut)) + 
-  geom_smooth()
-
-plot_combo <- diamonds %>% 
-  ggplot(aes(x = price, y = carat)) +
-  geom_point(color = "black", size = 1) +
-  geom_smooth(aes(color = cut)) +
-  xlim(0,3.0) +
-  facet_grid(~ cut) +
-  theme(legend.position = "none") +
-  labs(
-      title = "Diamond Carat (0.0-3.0) vs Price compared by Cut",
-      subtitle = "A diamond must be either high cut quality or low carat to fetch a high price",
-      x = "Carat (0.2 mg)", 
-      y = "Price ($)"
-      ) +
-  theme(plot.title = element_text(size = 18, face = "bold"))
-
-plot_point
-plot_smooth
-plot_combo
 ```
 
 **Observations**:
 
-The point plot is overwhelming and takes several tries to understand. After some time, I noticed that the better the cut, the more likely the diamonds is to get away with a higher price despite lower carats. Meanwhile diamonds that were only a lower cut happened to also be higher carat if they fetched a higher price.  
-
-The smooth line plot is much less overwhelming to examine, though I worry it implies a stronger relationship than I perceive. The trends described with the point plots still apply but this plot reveals something interesting about our data: for each cut, our data does not span the same carats (though the data points for those with fewer data points are diamonds with a carat above 3.0).
-
-This made we wonder if I should overlay the point and smooth plot and limit the x-axis (carats) to 0.0-3.0 and break the plot apart by cut. So I did this and the relationship is between cut, carat, and price is made all the more clear (aka the better the cut, the less the need to have a high carat diamond to fetch a high price). It also demonstrated that we may have more or less data per cut group - I wonder if this is a function of desirability while attempting to sell.
+- (Write your observations here!)
 
 # Communication
 <!-- -------------------------------------------------- -->
@@ -133,4 +102,3 @@ The [Datasets](https://olin-data-science.fandom.com/wiki/Datasets) page contains
 __q6__ *Prepare* to present your team's findings!
 
 __q7__ Add a link to your personal data-science repository on the [Repositories](https://olin-data-science.fandom.com/wiki/Repositories) page. Make sure to file it under your team name!
-
