@@ -63,14 +63,14 @@ for more information.
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ────────────── tidyverse 1.3.0 ──
+    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
 
     ## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
     ## ✓ tibble  3.0.1     ✓ dplyr   1.0.0
     ## ✓ tidyr   1.1.0     ✓ stringr 1.4.0
     ## ✓ readr   1.3.1     ✓ forcats 0.5.0
 
-    ## ── Conflicts ───────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
 
@@ -125,7 +125,7 @@ plot_combo <- diamonds %>%
   theme(legend.position = "none") +
   labs(
       title = "Diamond Carat (0.0-3.0) vs Price compared by Cut",
-      subtitle = "A diamond must be either high cut quality or low carat to fetch a high price",
+      subtitle = "A diamond must be either high cut quality or high carat to fetch a high price - if both, all the better!",
       x = "Carat (0.2 mg)", 
       y = "Price ($)"
       ) +
