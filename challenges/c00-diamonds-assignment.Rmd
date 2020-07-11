@@ -77,7 +77,7 @@ plot_smooth <- diamonds %>%
   ggplot(aes(x = carat, y = price, color = cut)) + 
   geom_smooth()
 
-plot_combo <- diamonds %>% 
+plot_combo_lim <- diamonds %>% 
   ggplot(aes(x = carat, y = price)) +
   geom_point(color = "black", size = 1) +
   geom_smooth(aes(color = cut)) +
@@ -86,15 +86,50 @@ plot_combo <- diamonds %>%
   theme(legend.position = "none") +
   labs(
       title = "Diamond Carat (0.0-3.0) vs Price compared by Cut",
-      subtitle = "A diamond must be either high cut quality or high carat to fetch a high price - if both, all the better!",
+      subtitle = "Using lim()",
       x = "Carat (0.2 mg)", 
       y = "Price ($)"
+      ) +
+  theme(plot.title = element_text(size = 18, face = "bold"))
+
+plot_combo_coordcartesian <- diamonds %>% 
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(color = "black", size = 1) +
+  geom_smooth(aes(color = cut)) +
+  coord_cartesian(xlim = c(0,3.0)) +
+  facet_grid(~ cut) +
+  theme(legend.position = "none") +
+  labs(
+      title = "Diamond Carat (0.0-3.0) vs Price compared by Cut",
+      subtitle = "Using coord_cartesian()",
+      x = "Carat (0.2 mg)", 
+      y = "Price ($)"
+      ) +
+  theme(plot.title = element_text(size = 18, face = "bold"))
+
+plot_combo_loglog <- diamonds %>% 
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(color = "black", size = 1) +
+  geom_smooth(method = lm, formula = y ~ x, aes(color = cut)) +
+  scale_x_continuous(trans='log2') +
+  scale_y_continuous(trans='log2') +
+  xlim(0, 3.0) +
+  ylim(0, 10000) +
+  facet_grid(~ cut) +
+  theme(legend.position = "none") +
+  labs(
+      title = "Diamond Carat (0.0-3.0) vs Price compared by Cut",
+      subtitle = "A diamond must be either high cut quality or high carat to fetch a high price - if both, all the better!",
+      x = "log of Carat (0.2 mg)", 
+      y = "log of Price ($)"
       ) +
   theme(plot.title = element_text(size = 18, face = "bold"))
 
 plot_point
 plot_smooth
 plot_combo
+plot_combo_loglog
+plot_combo_coordcartesian
 ```
 
 **Observations**:
