@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # data-science-curriculum
 
 This is a curriculum of **open-source** data science exercises, intended to take a student from zero coding experience to basic data science literacy. These exercises are heavily inspired by the (discontinued) [Data Challenge Lab](https://dcl-docs.stanford.edu/home/) at Stanford University and rely on the [Tidyverse](https://www.tidyverse.org/).
@@ -28,3 +29,8 @@ week on the exercises and taking weekends off!
 # Contributing
 I welcome suggestions and contributions! If you want to contribute, please see
 [Contributing](https://github.com/zdelrosario/data-science-curriculum/blob/master/contributing.md).
+||||||| merged common ancestors
+=======
+# data-science-coursework
+This is for the data science course 2020
+>>>>>>> 6520c6a99b57abb7ff1be21244892f0cffe912d7
