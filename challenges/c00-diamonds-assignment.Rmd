@@ -78,7 +78,7 @@ plot_smooth <- diamonds %>%
   geom_smooth()
 
 plot_combo <- diamonds %>% 
-  ggplot(aes(x = price, y = carat)) +
+  ggplot(aes(x = carat, y = price)) +
   geom_point(color = "black", size = 1) +
   geom_smooth(aes(color = cut)) +
   xlim(0,3.0) +
@@ -86,7 +86,7 @@ plot_combo <- diamonds %>%
   theme(legend.position = "none") +
   labs(
       title = "Diamond Carat (0.0-3.0) vs Price compared by Cut",
-      subtitle = "A diamond must be either high cut quality or low carat to fetch a high price",
+      subtitle = "A diamond must be either high cut quality or high carat to fetch a high price - if both, all the better!",
       x = "Carat (0.2 mg)", 
       y = "Price ($)"
       ) +
