@@ -1,7 +1,7 @@
 Getting Started: Diamonds
 ================
-(Your name here)
-2020-
+Ingrid Hagen-Keith
+2020-07-06
 
   - [Grading Rubric](#grading-rubric)
       - [Individual](#individual)
@@ -63,14 +63,14 @@ for more information.
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
+    ## ── Attaching packages ───────────────────────────────────────────── tidyverse 1.3.0 ──
 
     ## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
     ## ✓ tibble  3.0.1     ✓ dplyr   1.0.0
     ## ✓ tidyr   1.1.0     ✓ stringr 1.4.0
     ## ✓ readr   1.3.1     ✓ forcats 0.5.0
 
-    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ──────────────────────────────────────────────── tidyverse_conflicts() ──
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
 
@@ -116,7 +116,7 @@ plot_smooth <- diamonds %>%
   ggplot(aes(x = carat, y = price, color = cut)) + 
   geom_smooth()
 
-plot_combo <- diamonds %>% 
+plot_combo_lim <- diamonds %>% 
   ggplot(aes(x = carat, y = price)) +
   geom_point(color = "black", size = 1) +
   geom_smooth(aes(color = cut)) +
@@ -125,9 +125,40 @@ plot_combo <- diamonds %>%
   theme(legend.position = "none") +
   labs(
       title = "Diamond Carat (0.0-3.0) vs Price compared by Cut",
-      subtitle = "A diamond must be either high cut quality or high carat to fetch a high price - if both, all the better!",
+      subtitle = "Using lim()",
       x = "Carat (0.2 mg)", 
       y = "Price ($)"
+      ) +
+  theme(plot.title = element_text(size = 18, face = "bold"))
+
+plot_combo_coordcartesian <- diamonds %>% 
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(color = "black", size = 1) +
+  geom_smooth(aes(color = cut)) +
+  coord_cartesian(xlim = c(0,3.0)) +
+  facet_grid(~ cut) +
+  theme(legend.position = "none") +
+  labs(
+      title = "Diamond Carat (0.0-3.0) vs Price compared by Cut",
+      subtitle = "Using coord_cartesian()",
+      x = "Carat (0.2 mg)", 
+      y = "Price ($)"
+      ) +
+  theme(plot.title = element_text(size = 18, face = "bold"))
+
+plot_combo_loglog <- diamonds %>% 
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(color = "black", size = 1) +
+  geom_smooth(method = lm, formula = y ~ x, aes(color = cut)) +
+  scale_x_continuous(trans='log2') +
+  scale_y_continuous(trans='log2') +
+  facet_grid(~ cut) +
+  theme(legend.position = "none") +
+  labs(
+      title = "Diamond Carat (0.0-3.0) vs Price compared by Cut",
+      subtitle = "A diamond must be either high cut quality or high carat to fetch a high price - if both, all the better!",
+      x = "log of Carat (0.2 mg)", 
+      y = "log of Price ($)"
       ) +
   theme(plot.title = element_text(size = 18, face = "bold"))
 
@@ -145,7 +176,7 @@ plot_smooth
 ![](c00-diamonds-assignment_files/figure-gfm/q2-task-2.png)<!-- -->
 
 ``` r
-plot_combo
+plot_combo_lim
 ```
 
     ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
@@ -155,6 +186,20 @@ plot_combo
     ## Warning: Removed 32 rows containing missing values (geom_point).
 
 ![](c00-diamonds-assignment_files/figure-gfm/q2-task-3.png)<!-- -->
+
+``` r
+plot_combo_coordcartesian
+```
+
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+![](c00-diamonds-assignment_files/figure-gfm/q2-task-4.png)<!-- -->
+
+``` r
+plot_combo_loglog
+```
+
+![](c00-diamonds-assignment_files/figure-gfm/q2-task-5.png)<!-- -->
 
 **Observations**:
 
@@ -176,8 +221,21 @@ limit the x-axis (carats) to 0.0-3.0 and break the plot apart by cut. So
 I did this and the relationship is between cut, carat, and price is made
 all the more clear (aka the better the cut, the less the need to have a
 high carat diamond to fetch a high price). It also demonstrated that we
-may have more or less data per cut group - I wonder if this is a
-function of desirability while attempting to sell.
+may have more or less data per cut group (based on the number of points)
+- I wonder if this is a function of desirability while attempting to
+sell.
+
+Another interesting learning was about limits on axes: when I asked in
+class about the warning message rows were being removed, Zach mentioned
+something about 2 functions being available to limit the axes. So I did
+some research and that when using lim() vs coord\_cartesian() the smooth
+curves were different. lim() will cut the data anlyzed for the smooth
+function, while coord\_cartesian() just zooms into a particular part of
+the plot.
+
+Finally, I wanted to replicate when Zach demonstrated in class with the
+log-log scale and it’s very cool. I learned that I should be taking my
+analysis a bit further.
 
 # Communication
 

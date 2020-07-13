@@ -1,7 +1,7 @@
 ---
 title: "Getting Started: Diamonds"
-author: "(Your name here)"
-date: 2020-
+author: "Ingrid Hagen-Keith"
+date: 2020-07-06
 output:
   github_document:
     toc: true
@@ -113,8 +113,6 @@ plot_combo_loglog <- diamonds %>%
   geom_smooth(method = lm, formula = y ~ x, aes(color = cut)) +
   scale_x_continuous(trans='log2') +
   scale_y_continuous(trans='log2') +
-  xlim(0, 3.0) +
-  ylim(0, 10000) +
   facet_grid(~ cut) +
   theme(legend.position = "none") +
   labs(
@@ -127,9 +125,9 @@ plot_combo_loglog <- diamonds %>%
 
 plot_point
 plot_smooth
-plot_combo
-plot_combo_loglog
+plot_combo_lim
 plot_combo_coordcartesian
+plot_combo_loglog
 ```
 
 **Observations**:
@@ -138,7 +136,11 @@ The point plot is overwhelming and takes several tries to understand. After some
 
 The smooth line plot is much less overwhelming to examine, though I worry it implies a stronger relationship than I perceive. The trends described with the point plots still apply but this plot reveals something interesting about our data: for each cut, our data does not span the same carats (though the data points for those with fewer data points are diamonds with a carat above 3.0).
 
-This made we wonder if I should overlay the point and smooth plot and limit the x-axis (carats) to 0.0-3.0 and break the plot apart by cut. So I did this and the relationship is between cut, carat, and price is made all the more clear (aka the better the cut, the less the need to have a high carat diamond to fetch a high price). It also demonstrated that we may have more or less data per cut group - I wonder if this is a function of desirability while attempting to sell.
+This made we wonder if I should overlay the point and smooth plot and limit the x-axis (carats) to 0.0-3.0 and break the plot apart by cut. So I did this and the relationship is between cut, carat, and price is made all the more clear (aka the better the cut, the less the need to have a high carat diamond to fetch a high price). It also demonstrated that we may have more or less data per cut group (based on the number of points) - I wonder if this is a function of desirability while attempting to sell.
+
+Another interesting learning was about limits on axes: when I asked in class about the warning message rows were being removed, Zach mentioned something about 2 functions being available to limit the axes. So I did some research and that when using lim() vs coord_cartesian() the smooth curves were different. lim() will cut the data anlyzed for the smooth function, while coord_cartesian() just zooms into a particular part of the plot.
+
+Finally, I wanted to replicate when Zach demonstrated in class with the log-log scale and it's very cool. I learned that I should be taking my analysis a bit further.
 
 # Communication
 <!-- -------------------------------------------------- -->
