@@ -1,7 +1,7 @@
 ---
 title: "RMS Titanic"
-author: "(Your name here)"
-date: 2020-
+author: "Ingrid Hagen-Keith"
+date: 2020-07-16
 output:
   github_document:
     toc: true
@@ -52,15 +52,26 @@ df_titanic <- as_tibble(Titanic)
 # First Look
 <!-- -------------------------------------------------- -->
 
+## Question 1
+
 __q1__ Perform a glimpse of `df_titanic`. What variables are in this dataset?
 
 ```{r q1-task}
 ## TASK: Perform a `glimpse` of df_titanic
+glimpse(df_titanic)
 ```
 
-**Observations**:
+***Observations***:
 
-- List the variables here
+**The data frame includes the following variables:**
+
+* **Class (categorical)**
+* **Sex (categorical)**
+* **Age (categorical)**
+* **Survived (categorical)**
+* **n (continuous) aka the number of poeple for each category**
+
+## Question 2
 
 __q2__ Skim the [Wikipedia article](https://en.wikipedia.org/wiki/RMS_Titanic) on the RMS Titanic, and look for a total count of passengers. Compare against the total computed below. Are there any differences? Are those differences large or small? What might account for those differences?
 
@@ -70,21 +81,94 @@ __q2__ Skim the [Wikipedia article](https://en.wikipedia.org/wiki/RMS_Titanic) o
 df_titanic %>% summarize(total = sum(n))
 ```
 
-**Observations**:
+***Observations***:
 
-- Write your observations here
+* **The [Titanic Wikipedia article](https://en.wikipedia.org/wiki/RMS_Titanic) notes that**:
+
+> "passengers numbered approximately 1,317 people: 324 in First Class, 284 in Second Class, and 709 in Third Class. Of these, 869 (66%) were male and 447 (34%) female. There were 107 children aboard, the largest number of whom were in Third Class."
+
+* **Our data frame indicates that 2201 people were onboard the Titanic. This may be because the crew are included in the data frame. The article also includes that:**
+
+> "Titanic had around 885 crew members on board for her maiden voyage."
+
+* **When adding these two numbers, we find that the total `r 1317 + 885` is one person more than the total calculated in our data frame. In a different [Wikipedia article regarding seafarer ranks](https://en.wikipedia.org/wiki/Seafarer%27s_professions_and_ranks#:~:text=The%20captain%20represents%20the%20owner,to%20be%20a%20crew%20member.), I may have found the answer regarding the discrepancy of one person: technically the captain is not considered a crew member yet a [Titanic Wikipedia article about the crew](https://en.wikipedia.org/wiki/Crew_of_the_RMS_Titanic) includes the captain in the crew member list even though this is not technically correct.**
+
+> "The captain represents the owner and hence is called "master". The captain is officially not considered to be a crew member."
+
+## Question 3
 
 __q3__ Create a plot showing the count of passengers who *did* survive, along with aesthetics for `Class` and `Sex`. Document your observations below.
 
 *Note*: There are many ways to do this.
 
-```{r q3-task}
+```{r q3-task-v1}
 ## TASK: Visualize counts against `Class` and `Sex`
+
+df_q3_v1 <- df_titanic %>%
+  filter(Survived == "Yes") %>% 
+  group_by(Class, Sex) %>% 
+  summarise(total_survived = sum(n))
+
+df_q3_v1
+
+plot_col <- df_q3_v1 %>% 
+  ggplot() +
+  geom_col(aes(x = Class, y = total_survived, fill = Sex), position = "dodge") +
+  labs(title = "Surviving Passengers by Class and Sex", subtitle = "Q3 - Figure 1")
+
+plot_col
+
 ```
 
-**Observations**:
+**I first tried to filter the data. This answers the question but does not fulfill the prompt to use aesthetics to create the plot. I also noted that while this helps understand survivorship between groups, it does not put these numbers into context of the relative size of each group. So I tried again.**
 
-- Write your observations here
+```{r q3-task-v2}
+## TASK: Visualize counts against `Class` and `Sex`
+
+plot_col2 <- df_titanic %>% 
+  ggplot() +
+  geom_col(aes(x = Survived , y = n, fill = Class, color = Sex), position = "dodge") +
+  scale_colour_viridis_d() +
+  labs(title = "All Passengers by Class and Sex", subtitle = "Q3 - Figure 2")
+
+plot_col2
+
+```
+
+**This time, I wanted to include all data for Class, Sex, and Survived to get an idea of the proportion of survivors. I also wanted to follow the prompt by using aesthetics to represent Class and Sex.**
+
+**But this plot was super overwhelming. I did not like it at all.**
+
+```{r q3-task-v3}
+## TASK: Visualize counts against `Class` and `Sex`
+
+df_q3_v2 <- df_titanic %>% 
+  group_by(Class, Sex) %>% 
+  mutate( Total = sum(n), Prop = n / Total) %>% 
+  filter(Survived == "Yes")
+
+plot_col3 <- df_q3_v2 %>% 
+  ggplot() +
+  geom_col(aes(x = Sex, y = Prop, fill = Class), width = 0.9, position = "dodge") +
+  labs(title = "Proportion of Passengers that Survived by Class and Sex", subtitle = "Q3 - Figure 3")
+
+plot_col3
+
+
+```
+
+**This time, I calculated the proportion of survivors within the Class and Sex group. I also combined what I had learned from the two previous plots.**
+
+***Overall Observations:***
+
+* **Based on Q3 - Figure 2**
+  + **Because passengers are broken down by class and sex, the crew looks huge! They were mainly men and few survived.**
+
+* **Based on Q3 - Figure 3**
+  + **Women were more likely to survive than men - I remember that from the movie :)**
+  + **For women, your likelihood of surviving is related to class (1st more likely than crew, which is more likely than 2nd class, which is more likely than 3rd). For men, there is an interesting pattern - 1st is more likely than crew, which is more likely than *3rd* which is more likely than 2nd. Why could this be?**
+  + **The proportion of women in 1st class who survived is almsot three times that of men in 1st class, and ten times of that of men in 2nd class.**
+
 
 # Deeper Look
 <!-- -------------------------------------------------- -->
@@ -107,14 +191,26 @@ df_prop <-
 df_prop
 ```
 
+## Question 4
+
 __q4__ Replicate your visual from q3, but display `Prop` in place of `n`. Document your observations, and note any new/different observations you make in comparison with q3.
 
 ```{r q4-task}
-```
 
+plot_col2 <- df_prop %>% group_by(Class, Sex) %>% 
+  ggplot() +
+  geom_col(aes(x = Survived , y = Prop, fill = Class, color = Sex), position = "dodge") +
+  scale_colour_viridis_d() +
+  labs(title = "All Passengers by Class and Sex", subtitle = "Q3 - Figure 2")
+
+plot_col2
+
+```
 **Observations**:
 
 - Write your observations here.
+
+## Question 5
 
 __q5__ Create a plot showing the group-proportion of passengers who *did* survive, along with aesthetics for `Class`, `Sex`, *and* `Age`. Document your observations below.
 
