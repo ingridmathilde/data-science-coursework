@@ -12,6 +12,8 @@ Ingrid Hagen-Keith
       - [Question 2](#question-2)
       - [Question 3](#question-3)
   - [Deeper Look](#deeper-look)
+      - [Question 4](#question-4)
+      - [Question 5](#question-5)
   - [Notes](#notes)
 
 *Purpose*: Most datasets have at least a few variables. Part of our task
@@ -67,16 +69,32 @@ for more information.
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ──────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──
+    ## ── Attaching packages ────────────────────────────────────────────────────────── tidyverse 1.3.0 ──
 
     ## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
     ## ✓ tibble  3.0.1     ✓ dplyr   1.0.0
     ## ✓ tidyr   1.1.0     ✓ stringr 1.4.0
     ## ✓ readr   1.3.1     ✓ forcats 0.5.0
 
-    ## ── Conflicts ─────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ───────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
+
+``` r
+library(cowplot)
+```
+
+    ## 
+    ## ********************************************************
+
+    ## Note: As of version 1.0.0, cowplot does not change the
+
+    ##   default ggplot2 theme anymore. To recover the previous
+
+    ##   behavior, execute:
+    ##   theme_set(theme_cowplot())
+
+    ## ********************************************************
 
 ``` r
 df_titanic <- as_tibble(Titanic)
@@ -128,18 +146,30 @@ or small? What might account for those differences?
 ``` r
 ## NOTE: No need to edit! We'll cover how to
 ## do this calculation in a later exercise.
-df_titanic %>% summarize(total = sum(n))
+v1 <- df_titanic %>% summarize(total = sum(n))
+
+v2 <- df_titanic %>% group_by(Class) %>% summarize(sum(n))
 ```
 
-    ## # A tibble: 1 x 1
-    ##   total
-    ##   <dbl>
-    ## 1  2201
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+``` r
+v2
+```
+
+    ## # A tibble: 4 x 2
+    ##   Class `sum(n)`
+    ##   <chr>    <dbl>
+    ## 1 1st        325
+    ## 2 2nd        285
+    ## 3 3rd        706
+    ## 4 Crew       885
 
 ***Observations***:
 
   - **The [Titanic Wikipedia
-    article](https://en.wikipedia.org/wiki/RMS_Titanic) notes that**:
+    article](https://en.wikipedia.org/wiki/RMS_Titanic#Passengers) notes
+    that**:
 
 > “passengers numbered approximately 1,317 people: 324 in First Class,
 > 284 in Second Class, and 709 in Third Class. Of these, 869 (66%) were
@@ -181,102 +211,92 @@ df_q3_v1 <- df_titanic %>%
   filter(Survived == "Yes") %>% 
   group_by(Class, Sex) %>% 
   summarise(total_survived = sum(n))
-```
 
-    ## `summarise()` regrouping output by 'Class' (override with `.groups` argument)
-
-``` r
-df_q3_v1
-```
-
-    ## # A tibble: 8 x 3
-    ## # Groups:   Class [4]
-    ##   Class Sex    total_survived
-    ##   <chr> <chr>           <dbl>
-    ## 1 1st   Female            141
-    ## 2 1st   Male               62
-    ## 3 2nd   Female             93
-    ## 4 2nd   Male               25
-    ## 5 3rd   Female             90
-    ## 6 3rd   Male               88
-    ## 7 Crew  Female             20
-    ## 8 Crew  Male              192
-
-``` r
-plot_col <- df_q3_v1 %>% 
+plot_col_q3_v1 <- df_q3_v1 %>% 
   ggplot() +
   geom_col(aes(x = Class, y = total_survived, fill = Sex), position = "dodge") +
-  labs(title = "Surviving Passengers by Class and Sex", subtitle = "Q3 - Figure 1")
+  labs(title = "Surviving Passengers by Class and Sex", subtitle = "Q3 - Figure 1") +
+  theme(plot.title = element_text(size = 14, face = "bold"))
 
-plot_col
-```
-
-![](c01-titanic-assignment_files/figure-gfm/q3-task-v1-1.png)<!-- -->
-
-**I first tried to filter the data. This answers the question but does
-not fulfill the prompt to use aesthetics to create the plot. I also
-noted that while this helps understand survivorship between groups, it
-does not put these numbers into context of the relative size of each
-group. So I tried again.**
-
-``` r
-## TASK: Visualize counts against `Class` and `Sex`
-
-plot_col2 <- df_titanic %>% 
+plot_col_q3_v2 <- df_titanic %>% 
   ggplot() +
-  geom_col(aes(x = Survived , y = n, fill = Class, color = Sex), position = "dodge") +
+  geom_col(aes(x = Class , y = n, fill = Survived), position = "dodge") +
   scale_colour_viridis_d() +
-  labs(title = "All Passengers by Class and Sex", subtitle = "Q3 - Figure 2")
+  facet_grid(Sex~.) +
+  labs(
+      title = "All Passengers by Class and Sex", 
+      subtitle = "Q3 - Figure 2",
+      x = "Class", 
+      y = "Count"
+      ) +
+  theme(plot.title = element_text(size = 14, face = "bold"))
 
-plot_col2
+plot_col_q3_v3 <- df_titanic %>% 
+  ggplot() +
+  geom_col(aes(x = Class , y = n, fill = Survived), position = "fill") +
+  scale_colour_viridis_d() +
+  facet_grid(Sex~.) +
+  labs(
+      title = "Proportions of Passengers by Survivorship, Class and Sex", 
+      subtitle = "Q3 - Figure 3",
+      x = "Class", 
+      y = "Proportion"
+      ) +
+  theme(plot.title = element_text(size = 14, face = "bold"))
 ```
-
-![](c01-titanic-assignment_files/figure-gfm/q3-task-v2-1.png)<!-- -->
-
-**This time, I wanted to include all data for Class, Sex, and Survived
-to get an idea of the proportion of survivors. I also wanted to follow
-the prompt by using aesthetics to represent Class and Sex.**
-
-**But this plot was super overwhelming. I did not like it at all.**
 
 ``` r
 ## TASK: Visualize counts against `Class` and `Sex`
 
-df_q3_v2 <- df_titanic %>% 
-  group_by(Class, Sex) %>% 
-  mutate( Total = sum(n), Prop = n / Total) %>% 
-  filter(Survived == "Yes")
-
-plot_col3 <- df_q3_v2 %>% 
-  ggplot() +
-  geom_col(aes(x = Sex, y = Prop, fill = Class), width = 0.9, position = "dodge") +
-  labs(title = "Proportion of Passengers that Survived by Class and Sex", subtitle = "Q3 - Figure 3")
-
-plot_col3
+plot_col_q3_v1
 ```
 
-![](c01-titanic-assignment_files/figure-gfm/q3-task-v3-1.png)<!-- -->
+![](c01-titanic-assignment_files/figure-gfm/q3-task-call_plots-1.png)<!-- -->
 
-**This time, I calculated the proportion of survivors within the Class
-and Sex group. I also combined what I had learned from the two previous
-plots.**
+``` r
+plot_col_q3_v2
+```
+
+![](c01-titanic-assignment_files/figure-gfm/q3-task-call_plots-2.png)<!-- -->
+
+``` r
+plot_col_q3_v3
+```
+
+![](c01-titanic-assignment_files/figure-gfm/q3-task-call_plots-3.png)<!-- -->
+
+***Plot Creation Process***
+
+**Figure 1. I first tried to filter the data. I noted that while this
+helps understand survivorship between groups, it does not put these
+numbers into context of the relative size of each group. So I tried
+again.**
+
+**Figure 2. This time, I didn’t filter because I wanted to know about
+the relative frequency of survivorship across Class and Sex. That being
+said, it’s so much information (too many bars) so I tried again.**
+
+**Figure 3. Finally, I used the position = “fill” so get the relative
+likelihood of surviving based on the Class and Sex.**
 
 ***Overall Observations:***
 
   - **Based on Q3 - Figure 2**
-      - **Because passengers are broken down by class and sex, the crew
-        looks huge\! They were mainly men and few survived.**
-  - **Based on Q3 - Figure 3**
+      - **There were far more men aboard than women.**
       - **Women were more likely to survive than men - I remember that
         from the movie :)**
       - **For women, your likelihood of surviving is related to class
         (1st more likely than crew, which is more likely than 2nd class,
-        which is more likely than 3rd). For men, there is an interesting
-        pattern - 1st is more likely than crew, which is more likely
-        than *3rd* which is more likely than 2nd. Why could this be?**
-      - **The proportion of women in 1st class who survived is almsot
+        which is more likely than 3rd).**
+      - **The proportion of women in 1st class who survived is almost
         three times that of men in 1st class, and ten times of that of
         men in 2nd class.**
+      - **3rd class is the only class where more women died than
+        survived.**
+  - **Based on Q3 - Figure 3**
+      - **For men, there is an interesting pattern - 1st is more likely
+        than crew, which is more likely than *3rd* which is more likely
+        than 2nd. Why could this be? It is answered in Question 5\!**
 
 # Deeper Look
 
@@ -320,13 +340,212 @@ df_prop
     ## 10 2nd   Male   Adult No         154   168   0.917
     ## # … with 22 more rows
 
+## Question 4
+
 **q4** Replicate your visual from q3, but display `Prop` in place of
 `n`. Document your observations, and note any new/different observations
 you make in comparison with q3.
 
-**Observations**:
+``` r
+plot_col_q3_v3 <- df_titanic %>% 
+  ggplot() +
+  geom_col(aes(x = Class , y = n, fill = Survived), position = "fill") +
+  scale_colour_viridis_d() +
+  facet_grid(Sex~.) +
+  labs(
+      title = " ",
+      subtitle = "Question 3 - Figure 3",
+      x = "Class", 
+      y = "Proportion"
+      )
 
-  - Write your observations here.
+plot_col_q4_fill <- df_prop %>% 
+  ggplot() +
+  geom_col(aes(x = Class , y = Prop, fill = Survived), position = "fill") +
+  scale_colour_viridis_d() +
+  facet_grid(Sex~.) +
+  labs(
+      title = " ",
+      subtitle = "Q4 - Figure 1",
+      x = "Class", 
+      y = "Proportion"
+      ) +
+  theme(plot.title = element_text(size = 14, face = "bold"))
+
+plot_col_q4_dodge <- df_prop %>% 
+  ggplot() +
+  geom_col(aes(x = Class , y = Prop, fill = Survived), position = "dodge") +
+  scale_colour_viridis_d() +
+  facet_grid(Sex~.) +
+  labs(
+      title = " ",
+      subtitle = "Q4 - Figure 2",
+      x = "Class",
+      y = "Proportion"
+      ) +
+  theme(plot.title = element_text(size = 14, face = "bold"))
+```
+
+``` r
+plot_grid(
+  plot_col_q3_v3, 
+  plot_col_q4_fill, 
+  labels = c('Using y = n and position = fill', 'Using y = Prop and position = fill'), 
+  label_size = 12)
+```
+
+![](c01-titanic-assignment_files/figure-gfm/q4_fig1-1.png)<!-- -->
+
+***Observations***:
+
+  - **They don’t look the same\! Please reference the Men’s subplot\!
+    Very curious.**
+  - **So I made another plot to compare if it is because of position of
+    my plots.**
+  - **I currently trust the fill plot more than the proportion plot.**
+
+<!-- end list -->
+
+``` r
+plot_grid(
+  plot_col_q3_v3, 
+  plot_col_q4_dodge, 
+  labels = c('Using y = n and position = fill', 'Using y = Prop and position = dodge'), 
+  label_size = 12)
+```
+
+![](c01-titanic-assignment_files/figure-gfm/q4_fig2-1.png)<!-- -->
+
+  - **I truly cannot figure out why is it this way. I’m wondering if my
+    understanding of Prop. I would expect that each class per sex would
+    sum to 1.0 Nothing is matching up\!**
+  - **But I need to remember how these column plots work. When grouping
+    and using position = dodge, the columns are the sums of the values
+    where the sub-groupings (survived, class, sex) are true.**
+  - **So I’ll just compare thr proportions where Survived = “Yes”?**
+
+<!-- end list -->
+
+``` r
+plot_col_q4_survived <- df_prop %>%
+  filter(Survived == "Yes") %>% 
+  ggplot() +
+  geom_col(
+    aes(
+      x = Class , 
+      y = Prop, 
+      fill = Survived
+      ), 
+    position = "dodge"
+    ) +
+  scale_colour_viridis_d() +
+  facet_grid(Sex~.) +
+  labs(
+      title = " ",
+      subtitle = "Q4 - Figure 3",
+      x = "Class",
+      y = "Proportion"
+      ) +
+  theme(plot.title = element_text(size = 14, face = "bold"))
+
+plot_col_q4_survived
+```
+
+    ## Warning: Removed 2 rows containing missing values (geom_col).
+
+![](c01-titanic-assignment_files/figure-gfm/q4_fig3-1.png)<!-- -->
+
+``` r
+plot_grid(
+  plot_col_q3_v3,
+  plot_col_q4_survived,
+  labels = c('Column plot using y = n and position = fill', 'Using y = Prop, position = dodge, and Survived = Yes'),
+  label_size = 12)
+```
+
+    ## Warning: Removed 2 rows containing missing values (geom_col).
+
+![](c01-titanic-assignment_files/figure-gfm/q4_fig3-2.png)<!-- -->
+
+  - **Things are still not making sense. I think it may have to do with
+    how the data is grouped. So finally, I’m going to try calculating
+    the data myself but this time filtering only for those who
+    survived.**
+
+<!-- end list -->
+
+``` r
+## NOTE: No need to edit! We'll cover how to
+## do this calculation in a later exercise.
+df_prop2 <-
+  df_titanic %>%
+  group_by(Class, Sex) %>%
+  mutate(
+    Total = sum(n),
+    Prop = n / Total
+  ) %>%
+  filter(Survived == "Yes") #%>% 
+  #ungroup()
+
+  df_prop2
+```
+
+    ## # A tibble: 16 x 7
+    ## # Groups:   Class, Sex [8]
+    ##    Class Sex    Age   Survived     n Total    Prop
+    ##    <chr> <chr>  <chr> <chr>    <dbl> <dbl>   <dbl>
+    ##  1 1st   Male   Child Yes          5   180 0.0278 
+    ##  2 2nd   Male   Child Yes         11   179 0.0615 
+    ##  3 3rd   Male   Child Yes         13   510 0.0255 
+    ##  4 Crew  Male   Child Yes          0   862 0      
+    ##  5 1st   Female Child Yes          1   145 0.00690
+    ##  6 2nd   Female Child Yes         13   106 0.123  
+    ##  7 3rd   Female Child Yes         14   196 0.0714 
+    ##  8 Crew  Female Child Yes          0    23 0      
+    ##  9 1st   Male   Adult Yes         57   180 0.317  
+    ## 10 2nd   Male   Adult Yes         14   179 0.0782 
+    ## 11 3rd   Male   Adult Yes         75   510 0.147  
+    ## 12 Crew  Male   Adult Yes        192   862 0.223  
+    ## 13 1st   Female Adult Yes        140   145 0.966  
+    ## 14 2nd   Female Adult Yes         80   106 0.755  
+    ## 15 3rd   Female Adult Yes         76   196 0.388  
+    ## 16 Crew  Female Adult Yes         20    23 0.870
+
+``` r
+plot_col_q4_survived_p2 <- df_prop2 %>%
+  ggplot() +
+  geom_col(
+    aes(
+      x = Class , 
+      y = Prop, 
+      fill = Survived
+      ), 
+    position = "dodge"
+    ) +
+  scale_colour_viridis_d() +
+  facet_grid(Sex~.) +
+  labs(
+      title = " ",
+      subtitle = "Q4 - Figure 4",
+      x = "Class",
+      y = "Proportion"
+      ) +
+  theme(plot.title = element_text(size = 14, face = "bold"))
+
+plot_grid(
+  plot_col_q3_v3,
+  plot_col_q4_survived_p2,
+  labels = c('Column plot using y = n and position = fill', 'Using y = Prop, position = dodge, and Survived = Yes'),
+  label_size = 8)
+```
+
+![](c01-titanic-assignment_files/figure-gfm/q4_fig4-1.png)<!-- -->
+
+  - **Ok the proportions are closer but still not exactly the same. I’m
+    officially out of time to dig into this so I’ll need to ask Zach
+    about it :) I guess I tried.**
+
+## Question 5
 
 **q5** Create a plot showing the group-proportion of passengers who
 *did* survive, along with aesthetics for `Class`, `Sex`, *and* `Age`.
@@ -335,9 +554,32 @@ Document your observations below.
 *Hint*: Don’t forget that you can use `facet_grid` to help consider
 additional variables\!
 
-**Observations**:
+``` r
+plot_col_q5 <- 
+  df_prop %>% 
+  filter(Survived == "Yes") %>% 
+  ggplot() +
+  geom_col(aes(x = Class, y = Prop, fill = Sex), width = 0.9, position = "dodge") +
+  facet_grid(Age~.) +
+  labs(
+      title = "Proportion of Passengers that Survived by Class, Sex, and Age", 
+      subtitle = "Q5 - Figure 1",
+      x = "Class", 
+      y = "Proportion"
+      ) +
+  theme(plot.title = element_text(size = 14, face = "bold"))
 
-  - Write your observations here.
+
+plot_col_q5
+```
+
+![](c01-titanic-assignment_files/figure-gfm/q5-task-1.png)<!-- -->
+
+***Observations***:
+
+  - **All children in 1st and 2nd Class survived. 55% of female children
+    survived while almost 75% of male children survived. There were no
+    children in the crew.**
 
 # Notes
 
