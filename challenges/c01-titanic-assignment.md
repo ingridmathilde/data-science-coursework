@@ -422,7 +422,7 @@ plot_grid(
   - **But I need to remember how these column plots work. When grouping
     and using position = dodge, the columns are the sums of the values
     where the sub-groupings (survived, class, sex) are true.**
-  - **So I’ll just compare thr proportions where Survived = “Yes”?**
+  - **So I’ll just compare the proportions where Survived = “Yes”?**
 
 <!-- end list -->
 
@@ -448,14 +448,6 @@ plot_col_q4_survived <- df_prop %>%
       ) +
   theme(plot.title = element_text(size = 14, face = "bold"))
 
-plot_col_q4_survived
-```
-
-    ## Warning: Removed 2 rows containing missing values (geom_col).
-
-![](c01-titanic-assignment_files/figure-gfm/q4_fig3-1.png)<!-- -->
-
-``` r
 plot_grid(
   plot_col_q3_v3,
   plot_col_q4_survived,
@@ -465,7 +457,7 @@ plot_grid(
 
     ## Warning: Removed 2 rows containing missing values (geom_col).
 
-![](c01-titanic-assignment_files/figure-gfm/q4_fig3-2.png)<!-- -->
+![](c01-titanic-assignment_files/figure-gfm/q4_fig3-1.png)<!-- -->
 
   - **Things are still not making sense. I think it may have to do with
     how the data is grouped. So finally, I’m going to try calculating

@@ -274,7 +274,7 @@ plot_grid(
 
 * **I truly cannot figure out why is it this way. I'm wondering if my understanding of Prop. I would expect that each class per sex would sum to 1.0 Nothing is matching up!**
 * **But I need to remember how these column plots work. When grouping and using position = dodge, the columns are the sums of the values where the sub-groupings (survived, class, sex) are true.**
-* **So I'll just compare thr proportions where Survived = "Yes"?**
+* **So I'll just compare the proportions where Survived = "Yes"?**
 
 
 ```{r q4_fig3, fig.width = 10}
@@ -298,8 +298,6 @@ plot_col_q4_survived <- df_prop %>%
       y = "Proportion"
       ) +
   theme(plot.title = element_text(size = 14, face = "bold"))
-
-plot_col_q4_survived
 
 plot_grid(
   plot_col_q3_v3,
