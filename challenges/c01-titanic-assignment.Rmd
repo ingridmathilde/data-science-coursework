@@ -382,8 +382,6 @@ plot_col_q5 <-
 plot_col_q5
 ```
 
-
-
 ***Observations***:
 
 * **All children in 1st and 2nd Class survived. 55% of female children survived while almost 75% of male children survived. There were no children in the crew.**
