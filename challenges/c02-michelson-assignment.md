@@ -248,8 +248,9 @@ abs(error)/LIGHTSPEED_PM
 
 ***Observations***:
 
-**Michelson’s error is 2.9714118 times his uncertainty. As such his
-nominal estimate and error did not capture the true speed of light.**
+**Michelson’s error is 2.9714118 times his uncertainty. As such, his
+nominal estimate and error did not capture the true speed of light in a
+vacuum.**
 
 # Question 4
 
@@ -303,7 +304,7 @@ plot1 <- df_q2 %>%
     mapping = aes(x = x, y = y, label = label) 
   )
 
-plot1 + labs(title = "Counter-intuitively, Distinctness groups with larger N \ndid not approximate a normal distribution")
+plot1 + labs(title = "Counter-intuitively, Distinctness groups with larger N \ndid not approximate a normal distribution", y = "Vacuum Velocity of Light (km/s)")
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/q4-task-1.png)<!-- -->
@@ -312,20 +313,20 @@ plot1 + labs(title = "Counter-intuitively, Distinctness groups with larger N \nd
 plot2 <- df_q2 %>% 
   ggplot() +
   geom_histogram(
-    aes(VelocityVacuum, 
+    aes(Temp, 
         fill = Distinctness)
     ) +
   facet_grid(Distinctness~.) +
   theme(
-    legend.position = "NONE",
-  ) +
-  annotate("text", 
-           x = 299750, 
-           y = 4, label = 
-             c("Vacuun Speed of light->"), 
-           size = 3)
+    legend.position = "NONE")
+  # ) +
+  # annotate("text", 
+  #          x = 299750, 
+  #          y = 4, label = 
+  #            c("Vacuum Speed of light->"), 
+  #          size = 3)
 
-plot2 + geom_vline(xintercept = LIGHTSPEED_VACUUM)
+plot2
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -373,7 +374,9 @@ plot4
 ``` r
 plot5 <- df_error %>% 
   ggplot() +
-  geom_errorbar(
+  geom_hline(yintercept = LIGHTSPEED_MICHELSON, size = 2) +
+  geom_hline(yintercept = LIGHTSPEED_VACUUM) +
+  geom_pointrange(
     aes(x = Distinctness, 
         y = avg, 
         ymin = min, 
@@ -381,23 +384,39 @@ plot5 <- df_error %>%
         color = Distinctness
         ), 
     width = 0.2) +
-  geom_hline(yintercept = LIGHTSPEED_VACUUM) +
-  annotate("text", 
-           x = 0.7, 
-           y = 299820, 
-           label = c("Vacuum Speed of Light"), 
-           size = 3) +
   geom_label(
     aes(x = Distinctness, 
-        y = 299900, 
+        y = 299680, 
         label = paste("N = ", as.character(count))
         )
     ) +
   theme(
     legend.position = "NONE"
-    )
+    ) +
+   annotate("text", 
+           x = 1.5, 
+           y = 299830, 
+           label = c("Vacuum \nSpeed of Light"), 
+           size = 3) +
+    annotate("text", 
+           x = 1.5, 
+           y = 299980, 
+           label = c("Michelson's Nominal \nSpeed of Light"), 
+           size = 3) +
+  annotate("rect", 
+           xmin = 0.5, 
+           xmax = 3.5, 
+           ymin = LIGHTSPEED_MICHELSON-LIGHTSPEED_PM, 
+           ymax = LIGHTSPEED_MICHELSON+LIGHTSPEED_PM,
+           alpha = 0.2
+           ) +
+  coord_cartesian(xlim = c(1, 3.))
+```
 
-plot5
+    ## Warning: Ignoring unknown parameters: width
+
+``` r
+plot5 + labs(title = "Vacuum Velocity Error by Distinctness", y = "Average Vacuum Velocity of Light (km/s)")
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/q4-task-5.png)<!-- -->
@@ -405,10 +424,13 @@ plot5
 ``` r
 plot6 <- df_q2 %>% 
   ggplot()+
-  geom_point(aes(x = Date, y = Temp, color = Distinctness))
+  geom_point(aes(x = Date, y = Temp, color = Distinctness)) +
+  geom_smooth(aes(x = Date, y = Temp))
 
 plot6
 ```
+
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
 
 ![](c02-michelson-assignment_files/figure-gfm/q4-task-6.png)<!-- -->
 
