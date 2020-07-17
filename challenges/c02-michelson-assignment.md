@@ -7,6 +7,10 @@ ingridmathilde
       - [Individual](#individual)
       - [Team](#team)
       - [Due Date](#due-date)
+  - [Question 1](#question-1)
+  - [Question 2](#question-2)
+  - [Question 3](#question-3)
+  - [Question 4](#question-4)
       - [Bibliography](#bibliography)
 
 *Purpose*: When studying physical problems, there is an important
@@ -119,6 +123,8 @@ df_michelson %>% glimpse
   - `Temp`: Ambient temperature (Fahrenheit)
   - `Velocity`: Measured speed of light (km / s)
 
+# Question 1
+
 **q1** Re-create the following table (from Michelson (1880), pg. 139)
 using `df_michelson` and `dplyr`. Note that your values *will not* match
 those of Michelson *exactly*; why might this be?
@@ -170,6 +176,8 @@ for `VelocityVacuum` (from Michelson (1880), pg. 141). While this isn’t
 fully rigorous (\(+92\) km/s is based on the mean temperature), we’ll
 simply apply this correction to all the observations in the dataset.
 
+# Question 2
+
 **q2** Create a new variable `VelocityVacuum` with the \(+92\) km/s
 adjustment to `Velocity`. Assign this new dataframe to `df_q2`.
 
@@ -217,6 +225,8 @@ uncertainty. We will learn some means of quantifying uncertainty in this
 class, but for many real problems uncertainty includes some amount of
 human judgment.\[2\]
 
+# Question 3
+
 **q3** Compare Michelson’s speed of light estimate against the modern
 speed of light value. Is Michelson’s estimate of the error (his
 uncertainty) greater or less than the true error?
@@ -241,6 +251,8 @@ abs(error)/LIGHTSPEED_PM
 **Michelson’s error is 2.9714118 times his uncertainty. As such his
 nominal estimate and error did not capture the true speed of light.**
 
+# Question 4
+
 **q4** You have access to a few other variables. Construct a few
 visualizations of `VelocityVacuum` against these other factors. Are
 there other patterns in the data that might help explain the difference
@@ -249,12 +261,49 @@ between Michelson’s estimate and `LIGHTSPEED_VACUUM`?
 ``` r
 ## TODO: Compare Michelson's estimate and error against the true value
 ## Your code here!
+
+df_error <- df_q2 %>% 
+  arrange(desc(Distinctness)) %>% 
+  group_by(Distinctness) %>% 
+  summarise(
+    count = n(),
+    avg = mean(VelocityVacuum), 
+    max = max(VelocityVacuum), 
+    min = min(VelocityVacuum)
+    )
+```
+
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+``` r
+dat_text <- data.frame(
+  label = paste("N = ",as.character(pull(df_error,2))),
+  Distinctness   = pull(df_error,1),
+  x     = c(299950, 299960, 299970),
+  y     = c(0.001, 0.0012, 0.0014)
+)
+
+
 plot1 <- df_q2 %>% 
   ggplot() +
-  # geom_histogram(aes(Velocity)) +
-  geom_density(aes(VelocityVacuum, color = Distinctness, group = Distinctness))
+  geom_density(
+    aes(VelocityVacuum, 
+        color = Distinctness, 
+        group = Distinctness)
+    ) +
+  facet_grid(Distinctness~.) +
+  annotate("text", 
+           x = 299750, 
+           y = 0.004, 
+           label = c("Vacuum \nSpeed of Light"), 
+           size = 2.5) +
+  geom_vline(xintercept = LIGHTSPEED_VACUUM) +
+  geom_text(
+    data= dat_text,
+    mapping = aes(x = x, y = y, label = label) 
+  )
 
-plot1 + geom_vline(xintercept = LIGHTSPEED_VACUUM)
+plot1 + labs(title = "Counter-intuitively, Distinctness groups with larger N \ndid not approximate a normal distribution")
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/q4-task-1.png)<!-- -->
@@ -262,11 +311,19 @@ plot1 + geom_vline(xintercept = LIGHTSPEED_VACUUM)
 ``` r
 plot2 <- df_q2 %>% 
   ggplot() +
-  geom_histogram(aes(VelocityVacuum, fill = Distinctness)) +
+  geom_histogram(
+    aes(VelocityVacuum, 
+        fill = Distinctness)
+    ) +
   facet_grid(Distinctness~.) +
   theme(
     legend.position = "NONE",
-  )
+  ) +
+  annotate("text", 
+           x = 299750, 
+           y = 4, label = 
+             c("Vacuun Speed of light->"), 
+           size = 3)
 
 plot2 + geom_vline(xintercept = LIGHTSPEED_VACUUM)
 ```
@@ -278,9 +335,21 @@ plot2 + geom_vline(xintercept = LIGHTSPEED_VACUUM)
 ``` r
 plot3 <- df_q2 %>% 
   ggplot() +
-  geom_density2d(aes(x = Temp, VelocityVacuum, color = Distinctness)) +
+  geom_density2d(
+    aes(x = Temp, 
+        y = Velocity, 
+        color = Distinctness)
+    ) +
   facet_grid(Distinctness~.) +
-  geom_hline(yintercept = LIGHTSPEED_VACUUM)
+  geom_hline(yintercept = LIGHTSPEED_VACUUM) +
+  annotate("text", 
+           x = 65, 
+           y = 299850, 
+           label = c("Vacuum \nSpeed of Light"), 
+           size = 3) +
+theme(
+    legend.position = "NONE",
+  )
 
 plot3
 ```
@@ -300,6 +369,48 @@ plot4
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/q4-task-4.png)<!-- -->
+
+``` r
+plot5 <- df_error %>% 
+  ggplot() +
+  geom_errorbar(
+    aes(x = Distinctness, 
+        y = avg, 
+        ymin = min, 
+        ymax = max, 
+        color = Distinctness
+        ), 
+    width = 0.2) +
+  geom_hline(yintercept = LIGHTSPEED_VACUUM) +
+  annotate("text", 
+           x = 0.7, 
+           y = 299820, 
+           label = c("Vacuum Speed of Light"), 
+           size = 3) +
+  geom_label(
+    aes(x = Distinctness, 
+        y = 299900, 
+        label = paste("N = ", as.character(count))
+        )
+    ) +
+  theme(
+    legend.position = "NONE"
+    )
+
+plot5
+```
+
+![](c02-michelson-assignment_files/figure-gfm/q4-task-5.png)<!-- -->
+
+``` r
+plot6 <- df_q2 %>% 
+  ggplot()+
+  geom_point(aes(x = Date, y = Temp, color = Distinctness))
+
+plot6
+```
+
+![](c02-michelson-assignment_files/figure-gfm/q4-task-6.png)<!-- -->
 
 ## Bibliography
 
