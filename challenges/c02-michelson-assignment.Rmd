@@ -1,7 +1,7 @@
 ---
 title: "Michelson Speed-of-light Measurements"
-author: "(Your name here)"
-date: 2020-
+author: "ingridmathilde"
+date: 2020-07-16
 output:
   github_document:
     toc: true
@@ -90,6 +90,8 @@ df_michelson %>% glimpse
 - `Temp`: Ambient temperature (Fahrenheit)
 - `Velocity`: Measured speed of light (km / s)
 
+# Question 1
+
 __q1__ Re-create the following table (from Michelson (1880), pg. 139) using
 `df_michelson` and `dplyr`. Note that your values *will not* match those of
 Michelson *exactly*; why might this be?
@@ -102,15 +104,21 @@ Michelson *exactly*; why might this be?
 
 ```{r q1-task}
 ## TODO: Compute summaries
-df_q1 <- NA
+df_q1 <- df_michelson
 df_q1 %>%
   arrange(desc(Distinctness)) %>%
-  knitr::kable()
+  group_by(Distinctness) %>% 
+  summarise(n = n(), MeanVelocity = mean(Velocity)) #%>%
+  #knitr::kable()
+
 ```
 
 **Observations**:
-- Write your observations here!
-- Why might your table differ from Michelson's?
+
+* **Images are more distinct if the velocity is higher.**
+* **He records more instances of level 2 or 3 distinctness than 1 - could this be an issue of threshold? A rating system is also dicey - could he have tested with multiple people to get a better sense of the accuracy of his rating system?**
+* **The velocities are different because we are using type double for velocity. I imagine he did not have that degree of precise calculation.**
+* **See below and update with evidence.**
 
 The `Velocity` values in the dataset are the speed of light *in air*; Michelson
 introduced a couple of adjustments to estimate the speed of light in a vacuum.
@@ -119,12 +127,15 @@ Michelson (1880), pg. 141). While this isn't fully rigorous ($+92$ km/s is based
 on the mean temperature), we'll simply apply this correction to all the
 observations in the dataset.
 
+# Question 2
+
 __q2__ Create a new variable `VelocityVacuum` with the $+92$ km/s adjustment to
 `Velocity`. Assign this new dataframe to `df_q2`.
 
 ```{r q2-task}
 ## TODO: Adjust the data, assign to df_q2
-df_q2 <- NA
+df_q2 <- df_michelson %>% 
+  mutate(VelocityVacuum = Velocity + 92)
 
 df_q2
 ```
@@ -148,6 +159,8 @@ the error. The best they can do is quantify their degree of uncertainty. We will
 learn some means of quantifying uncertainty in this class, but for many real
 problems uncertainty includes some amount of human judgment.[2]
 
+# Question 3
+
 __q3__ Compare Michelson's speed of light estimate against the modern speed of
 light value. Is Michelson's estimate of the error (his uncertainty) greater or
 less than the true error?
@@ -155,16 +168,65 @@ less than the true error?
 ```{r q3-task}
 ## TODO: Compare Michelson's estimate and error against the true value
 ## Your code here!
+
+#Use this as reference for small data sets: https://www.physics.upenn.edu/sites/default/files/Managing%20Errors%20and%20Uncertainty.pdf
+
+error <- LIGHTSPEED_VACUUM - LIGHTSPEED_MICHELSON
+upperbound <- LIGHTSPEED_MICHELSON + LIGHTSPEED_PM
+lowerbound <- LIGHTSPEED_MICHELSON - LIGHTSPEED_PM
+
+abs(error)/LIGHTSPEED_PM
+
 ```
 
-**Observations**:
+***Observations***:
+
+**Michelson's error is `r abs(error)/LIGHTSPEED_PM` times his uncertainty. As such his nominal estimate and error did not capture the true speed of light.**
 
 __q4__ You have access to a few other variables. Construct a few visualizations
 of `VelocityVacuum` against these other factors. Are there other patterns in the
 data that might help explain the difference between Michelson's estimate and
 `LIGHTSPEED_VACUUM`?
 
+```{r q4-task}
+## TODO: Compare Michelson's estimate and error against the true value
+## Your code here!
+plot1 <- df_q2 %>% 
+  ggplot() +
+  # geom_histogram(aes(Velocity)) +
+  geom_density(aes(VelocityVacuum, color = Distinctness, group = Distinctness))
 
+plot1 + geom_vline(xintercept = LIGHTSPEED_VACUUM)
+
+plot2 <- df_q2 %>% 
+  ggplot() +
+  geom_histogram(aes(VelocityVacuum, fill = Distinctness)) +
+  facet_grid(Distinctness~.) +
+  theme(
+    legend.position = "NONE",
+  )
+
+plot2 + geom_vline(xintercept = LIGHTSPEED_VACUUM)
+
+plot3 <- df_q2 %>% 
+  ggplot() +
+  geom_density2d(aes(x = Temp, VelocityVacuum, color = Distinctness)) +
+  facet_grid(Distinctness~.) +
+  geom_hline(yintercept = LIGHTSPEED_VACUUM)
+
+plot3
+
+plot4 <-  df_q2 %>% 
+  ggplot() +
+  geom_hline(yintercept = LIGHTSPEED_VACUUM, show.legend = TRUE) +
+  geom_hline(yintercept = LIGHTSPEED_MICHELSON, size = 2) +
+  geom_hline(yintercept = LIGHTSPEED_MICHELSON+LIGHTSPEED_PM, size = 2, linetype = 3) +
+  geom_hline(yintercept = LIGHTSPEED_MICHELSON-LIGHTSPEED_PM, size = 2, linetype = 3) +
+  geom_boxplot(aes(x = Distinctness, y = VelocityVacuum, color = Distinctness)) 
+  
+plot4
+
+```
 
 ## Bibliography
 
