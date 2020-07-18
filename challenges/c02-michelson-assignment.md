@@ -316,7 +316,7 @@ plot1 <- df_q2 %>%
     mapping = aes(x = x, y = y, label = label) 
   )
 
-plot1 + labs(title = "Counter-intuitively, Distinctness groups with larger N \ndid not approximate a normal distribution", y = "Vacuum Velocity of Light (km/s)")
+plot1 + labs(title = "The different groups organized by distinctness follow a \nroughly normal distribution", y = "Vacuum Velocity of Light (km/s)")
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/q4-task-1.png)<!-- -->
