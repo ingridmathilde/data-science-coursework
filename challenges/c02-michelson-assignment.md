@@ -65,6 +65,7 @@ for more information.
 # Libraries
 library(tidyverse)
 library(googlesheets4)
+library(cowplot)
 
 url <- "https://docs.google.com/spreadsheets/d/1av_SXn4j0-4Rk0mQFik3LLr-uf0YdA06i3ugE6n-Zdo/edit?usp=sharing"
 
@@ -141,33 +142,29 @@ df_q1 <- df_michelson
 df_q1 %>%
   arrange(desc(Distinctness)) %>%
   group_by(Distinctness) %>% 
-  summarise(n = n(), MeanVelocity = mean(Velocity)) #%>%
+  summarise(n = n(), MeanVelocity = mean(Velocity)) %>%
+  knitr::kable()
 ```
 
     ## `summarise()` ungrouping output (override with `.groups` argument)
 
-    ## # A tibble: 3 x 3
-    ##   Distinctness     n MeanVelocity
-    ##   <fct>        <int>        <dbl>
-    ## 1 1               15      299808 
-    ## 2 2               39      299858.
-    ## 3 3               46      299862.
-
-``` r
-  #knitr::kable()
-```
+| Distinctness |  n | MeanVelocity |
+| :----------- | -: | -----------: |
+| 1            | 15 |     299808.0 |
+| 2            | 39 |     299858.5 |
+| 3            | 46 |     299861.7 |
 
 **Observations**:
 
-  - **Images are more distinct if the velocity is higher.**
+  - **If the velocity is higher, I would expect the images to be more
+    distinct.**
   - **He records more instances of level 2 or 3 distinctness than 1 -
     could this be an issue of threshold? A rating system is also dicey -
     could he have tested with multiple people to get a better sense of
     the accuracy of his rating system?**
   - **The velocities are different because we are using type double for
     velocity. I imagine he did not have that degree of precise
-    calculation.**
-  - **See below and update with evidence.**
+    calculation. So I’m wondering - should we?**
 
 The `Velocity` values in the dataset are the speed of light *in air*;
 Michelson introduced a couple of adjustments to estimate the speed of
@@ -186,23 +183,16 @@ adjustment to `Velocity`. Assign this new dataframe to `df_q2`.
 df_q2 <- df_michelson %>% 
   mutate(VelocityVacuum = Velocity + 92)
 
-df_q2
+glimpse(df_q2)
 ```
 
-    ## # A tibble: 100 x 5
-    ##    Date                Distinctness  Temp Velocity VelocityVacuum
-    ##    <dttm>              <fct>        <dbl>    <dbl>          <dbl>
-    ##  1 1879-06-05 00:00:00 3               76   299850         299942
-    ##  2 1879-06-07 00:00:00 2               72   299740         299832
-    ##  3 1879-06-07 00:00:00 2               72   299900         299992
-    ##  4 1879-06-07 00:00:00 2               72   300070         300162
-    ##  5 1879-06-07 00:00:00 2               72   299930         300022
-    ##  6 1879-06-07 00:00:00 2               72   299850         299942
-    ##  7 1879-06-09 00:00:00 3               83   299950         300042
-    ##  8 1879-06-09 00:00:00 3               83   299980         300072
-    ##  9 1879-06-09 00:00:00 3               83   299980         300072
-    ## 10 1879-06-09 00:00:00 3               83   299880         299972
-    ## # … with 90 more rows
+    ## Rows: 100
+    ## Columns: 5
+    ## $ Date           <dttm> 1879-06-05, 1879-06-07, 1879-06-07, 1879-06-07, 1879-…
+    ## $ Distinctness   <fct> 3, 2, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2, 2, 1, 3, 3, …
+    ## $ Temp           <dbl> 76, 72, 72, 72, 72, 72, 83, 83, 83, 83, 83, 90, 90, 71…
+    ## $ Velocity       <dbl> 299850, 299740, 299900, 300070, 299930, 299850, 299950…
+    ## $ VelocityVacuum <dbl> 299942, 299832, 299992, 300162, 300022, 299942, 300042…
 
 As part of his study, Michelson assessed the various potential sources
 of error, and provided his best-guess for the error in his
@@ -240,14 +230,42 @@ uncertainty) greater or less than the true error?
 error <- LIGHTSPEED_VACUUM - LIGHTSPEED_MICHELSON
 relative_error <- (LIGHTSPEED_MICHELSON - LIGHTSPEED_VACUUM)/LIGHTSPEED_VACUUM*100
 factor <- abs(error)/LIGHTSPEED_PM
+
+df_error <- df_q2 %>% 
+  arrange(desc(Distinctness)) %>% 
+  group_by(Distinctness) %>% 
+  summarise(
+    count = n(),
+    avg = mean(VelocityVacuum), 
+    max = max(VelocityVacuum), 
+    min = min(VelocityVacuum),
+    mean_uncertainty = (max-min)/(2*sqrt(count)),
+    rel_uncertainty = mean_uncertainty/avg,
+    rel_err = abs((avg - LIGHTSPEED_VACUUM)/LIGHTSPEED_VACUUM)*100
+    )
 ```
+
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+``` r
+df_error %>%
+  knitr::kable()
+```
+
+| Distinctness | count |      avg |    max |    min | mean\_uncertainty | rel\_uncertainty |  rel\_err |
+| :----------- | ----: | -------: | -----: | -----: | ----------------: | ---------------: | --------: |
+| 1            |    15 | 299900.0 | 299992 | 299712 |          36.14784 |        0.0001205 | 0.0358721 |
+| 2            |    39 | 299950.5 | 300162 | 299742 |          33.62691 |        0.0001121 | 0.0527043 |
+| 3            |    46 | 299953.7 | 300092 | 299812 |          20.64187 |        0.0000688 | 0.0537976 |
 
 ***Observations***:
 
-**Michelson’s error is 2.9714118 times his uncertainty. His nominal
-estimate (2.9994410^{5} km/s) and error (+/- 51 km/s) did not capture
-the true speed of light in a vacuum (2.997924610^{5} kms/s). That being
-said, his relative error is so small - 0.050549 %\!**
+  - **Michelson’s error is 2.9714118 times his uncertainty. His nominal
+    estimate (2.9994410^{5} km/s) and error (+/- 51 km/s) did not
+    capture the true speed of light in a vacuum (2.997924610^{5} kms/s).
+    That being said, his relative error is so small - 0.050549 %\!**
+  - **Even when broken down by Distinctness groups, the realtive error
+    is still teeny-tiny\!**
 
 # Question 4
 
@@ -260,32 +278,6 @@ between Michelson’s estimate and `LIGHTSPEED_VACUUM`?
 ## TODO: Compare Michelson's estimate and error against the true value
 ## Your code here!
 
-df_error <- df_q2 %>% 
-  arrange(desc(Distinctness)) %>% 
-  group_by(Distinctness) %>% 
-  summarise(
-    count = n(),
-    avg = mean(VelocityVacuum), 
-    max = max(VelocityVacuum), 
-    min = min(VelocityVacuum),
-    mean_uncertainty = (max-min)/(2*sqrt(count))
-    )
-```
-
-    ## `summarise()` ungrouping output (override with `.groups` argument)
-
-``` r
-df_error
-```
-
-    ## # A tibble: 3 x 6
-    ##   Distinctness count     avg    max    min mean_uncertainty
-    ##   <fct>        <int>   <dbl>  <dbl>  <dbl>            <dbl>
-    ## 1 1               15 299900  299992 299712             36.1
-    ## 2 2               39 299950. 300162 299742             33.6
-    ## 3 3               46 299954. 300092 299812             20.6
-
-``` r
 dat_text <- data.frame(
   label = paste("N = ",as.character(pull(df_error,2))),
   Distinctness   = pull(df_error,1),
@@ -313,30 +305,6 @@ plot1 <- df_q2 %>%
     mapping = aes(x = x, y = y, label = label) 
   )
 
-plot1 + labs(title = "The different groups organized by distinctness follow a \nroughly normal distribution", y = "Vacuum Velocity of Light (km/s)")
-```
-
-![](c02-michelson-assignment_files/figure-gfm/q4-task-1.png)<!-- -->
-
-``` r
-plot2 <- df_q2 %>% 
-  ggplot() +
-  geom_histogram(
-    aes(Temp, 
-        fill = Distinctness)
-    ) +
-  facet_grid(Distinctness~.) +
-  theme(
-    legend.position = "NONE")
-
-plot2
-```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
-![](c02-michelson-assignment_files/figure-gfm/q4-task-2.png)<!-- -->
-
-``` r
 plot3 <- df_q2 %>% 
   ggplot() +
   geom_density2d_filled(aes(x = Temp,y = Velocity), alpha = 0.5) +
@@ -344,26 +312,6 @@ plot3 <- df_q2 %>%
   facet_grid(Distinctness~.) +
   geom_hline(yintercept = LIGHTSPEED_VACUUM, color = "black", size = 2)
 
-plot3 + labs(title = "Density of Velocity of Light (measured but not corrected) vs Temperature", subtitle = "True Vacuum Velocity of Light denoted with a white horizontal line", x = "Velocity (km/s)", y = "Temperature (degrees C)")
-```
-
-![](c02-michelson-assignment_files/figure-gfm/q4-task-3.png)<!-- -->
-
-``` r
-plot4 <-  df_q2 %>% 
-  ggplot() +
-  geom_hline(yintercept = LIGHTSPEED_VACUUM, show.legend = TRUE) +
-  geom_hline(yintercept = LIGHTSPEED_MICHELSON, size = 2) +
-  geom_hline(yintercept = LIGHTSPEED_MICHELSON+LIGHTSPEED_PM, size = 2, linetype = 3) +
-  geom_hline(yintercept = LIGHTSPEED_MICHELSON-LIGHTSPEED_PM, size = 2, linetype = 3) +
-  geom_boxplot(aes(x = Distinctness, y = VelocityVacuum, color = Distinctness)) 
-  
-plot4 
-```
-
-![](c02-michelson-assignment_files/figure-gfm/q4-task-4.png)<!-- -->
-
-``` r
 plot5 <- df_error %>% 
   ggplot() +
   geom_hline(yintercept = LIGHTSPEED_MICHELSON, size = 2) +
@@ -418,40 +366,24 @@ plot5 <- df_error %>%
     ## Warning: Ignoring unknown parameters: width
 
 ``` r
+plot1 + labs(title = "The different groups organized by distinctness follow a \nroughly normal distribution", y = "Vacuum Velocity of Light (km/s)")
+```
+
+![](c02-michelson-assignment_files/figure-gfm/first%20plot-1.png)<!-- -->
+
+***Observations for first plot***
+
+``` r
+plot3 + labs(title = "Density of Velocity of Light (measured but not corrected) vs Temperature", subtitle = "True Vacuum Velocity of Light denoted with a white horizontal line", x = "Velocity (km/s)", y = "Temperature (degrees C)")
+```
+
+![](c02-michelson-assignment_files/figure-gfm/second%20plot-1.png)<!-- -->
+
+``` r
 plot5 + labs(title = "Vacuum Velocity Uncertainty by Distinctness", y = "Average Vacuum Velocity of Light (km/s)", subtitle = "Whisker represent calculated uncertainty in the mean per Distinctness")
 ```
 
-![](c02-michelson-assignment_files/figure-gfm/q4-task-5.png)<!-- -->
-
-``` r
-plot6 <- df_q2 %>% 
-  ggplot()+
-  geom_point(aes(x = Date, y = Temp, color = Distinctness))
-
-plot6
-```
-
-![](c02-michelson-assignment_files/figure-gfm/q4-task-6.png)<!-- -->
-
-``` r
-plot7 <- df_q2 %>% 
-  ggplot() +
-  geom_boxplot(aes(x = Date,y = Temp, group = Date))
-
-plot7
-```
-
-![](c02-michelson-assignment_files/figure-gfm/q4-task-7.png)<!-- -->
-
-``` r
-plot8 <- df_q2 %>% 
-  ggplot() +
-  geom_boxplot(aes(x = Date,y = VelocityVacuum, group = Date))
-
-plot8
-```
-
-![](c02-michelson-assignment_files/figure-gfm/q4-task-8.png)<!-- -->
+![](c02-michelson-assignment_files/figure-gfm/third%20plot-1.png)<!-- -->
 
 ## Bibliography
 
