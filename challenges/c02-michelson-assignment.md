@@ -238,19 +238,16 @@ uncertainty) greater or less than the true error?
 #Use this as reference for small data sets: https://www.physics.upenn.edu/sites/default/files/Managing%20Errors%20and%20Uncertainty.pdf
 
 error <- LIGHTSPEED_VACUUM - LIGHTSPEED_MICHELSON
-upperbound <- LIGHTSPEED_MICHELSON + LIGHTSPEED_PM
-lowerbound <- LIGHTSPEED_MICHELSON - LIGHTSPEED_PM
-
-abs(error)/LIGHTSPEED_PM
+relative_error <- (LIGHTSPEED_MICHELSON - LIGHTSPEED_VACUUM)/LIGHTSPEED_VACUUM*100
+factor <- abs(error)/LIGHTSPEED_PM
 ```
-
-    ## [1] 2.971412
 
 ***Observations***:
 
-**Michelson’s error is 2.9714118 times his uncertainty. As such, his
-nominal estimate and error did not capture the true speed of light in a
-vacuum.**
+**Michelson’s error is 2.9714118 times his uncertainty. His nominal
+estimate (2.9994410^{5} km/s) and error (+/- 51 km/s) did not capture
+the true speed of light in a vacuum (2.997924610^{5} kms/s). That being
+said, his relative error is so small - 0.050549 %\!**
 
 # Question 4
 
@@ -331,12 +328,6 @@ plot2 <- df_q2 %>%
   facet_grid(Distinctness~.) +
   theme(
     legend.position = "NONE")
-  # ) +
-  # annotate("text", 
-  #          x = 299750, 
-  #          y = 4, label = 
-  #            c("Vacuum Speed of light->"), 
-  #          size = 3)
 
 plot2
 ```
@@ -405,15 +396,15 @@ plot5 <- df_error %>%
    annotate("text", 
            x = 1.5, 
            y = 299830, 
-           label = c("Vacuum \nSpeed of Light"), 
+           label = c("True Vacuum \nSpeed of Light"), 
            size = 3,
-           color = "white") +
+           color = "black") +
     annotate("text", 
            x = 1.5, 
            y = 299980, 
            label = c("Michelson's Nominal \nSpeed of Light"), 
            size = 3,
-           color = "white") +
+           color = "black") +
   annotate("rect", 
            xmin = 0.5, 
            xmax = 3.5, 
@@ -435,15 +426,32 @@ plot5 + labs(title = "Vacuum Velocity Uncertainty by Distinctness", y = "Average
 ``` r
 plot6 <- df_q2 %>% 
   ggplot()+
-  geom_point(aes(x = Date, y = Temp, color = Distinctness)) +
-  geom_smooth(aes(x = Date, y = Temp))
+  geom_point(aes(x = Date, y = Temp, color = Distinctness))
 
 plot6
 ```
 
-    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
-
 ![](c02-michelson-assignment_files/figure-gfm/q4-task-6.png)<!-- -->
+
+``` r
+plot7 <- df_q2 %>% 
+  ggplot() +
+  geom_boxplot(aes(x = Date,y = Temp, group = Date))
+
+plot7
+```
+
+![](c02-michelson-assignment_files/figure-gfm/q4-task-7.png)<!-- -->
+
+``` r
+plot8 <- df_q2 %>% 
+  ggplot() +
+  geom_boxplot(aes(x = Date,y = VelocityVacuum, group = Date))
+
+plot8
+```
+
+![](c02-michelson-assignment_files/figure-gfm/q4-task-8.png)<!-- -->
 
 ## Bibliography
 
