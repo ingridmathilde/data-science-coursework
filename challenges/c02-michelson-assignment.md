@@ -270,11 +270,23 @@ df_error <- df_q2 %>%
     count = n(),
     avg = mean(VelocityVacuum), 
     max = max(VelocityVacuum), 
-    min = min(VelocityVacuum)
+    min = min(VelocityVacuum),
+    mean_uncertainty = (max-min)/(2*sqrt(count))
     )
 ```
 
     ## `summarise()` ungrouping output (override with `.groups` argument)
+
+``` r
+df_error
+```
+
+    ## # A tibble: 3 x 6
+    ##   Distinctness count     avg    max    min mean_uncertainty
+    ##   <fct>        <int>   <dbl>  <dbl>  <dbl>            <dbl>
+    ## 1 1               15 299900  299992 299712             36.1
+    ## 2 2               39 299950. 300162 299742             33.6
+    ## 3 3               46 299954. 300092 299812             20.6
 
 ``` r
 dat_text <- data.frame(
@@ -336,23 +348,12 @@ plot2
 ``` r
 plot3 <- df_q2 %>% 
   ggplot() +
-  geom_density2d(
-    aes(x = Temp, 
-        y = Velocity, 
-        color = Distinctness)
-    ) +
+  geom_density2d_filled(aes(x = Temp,y = Velocity), alpha = 0.5) +
+  geom_density2d(aes(x = Temp,y = Velocity),color = "black") +
   facet_grid(Distinctness~.) +
-  geom_hline(yintercept = LIGHTSPEED_VACUUM) +
-  annotate("text", 
-           x = 65, 
-           y = 299850, 
-           label = c("Vacuum \nSpeed of Light"), 
-           size = 3) +
-theme(
-    legend.position = "NONE",
-  )
+  geom_hline(yintercept = LIGHTSPEED_VACUUM, color = "black", size = 2)
 
-plot3
+plot3 + labs(title = "Density of Velocity of Light (measured but not corrected) vs Temperature", subtitle = "True Vacuum Velocity of Light denoted with a white horizontal line", x = "Velocity (km/s)", y = "Temperature (degrees C)")
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/q4-task-3.png)<!-- -->
@@ -366,7 +367,7 @@ plot4 <-  df_q2 %>%
   geom_hline(yintercept = LIGHTSPEED_MICHELSON-LIGHTSPEED_PM, size = 2, linetype = 3) +
   geom_boxplot(aes(x = Distinctness, y = VelocityVacuum, color = Distinctness)) 
   
-plot4
+plot4 
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/q4-task-4.png)<!-- -->
@@ -384,6 +385,14 @@ plot5 <- df_error %>%
         color = Distinctness
         ), 
     width = 0.2) +
+   geom_errorbar(
+    aes(x = Distinctness, 
+        y = avg, 
+        ymin = avg-mean_uncertainty, 
+        ymax = avg+mean_uncertainty, 
+        color = Distinctness
+        ), 
+    width = 0.2) +
   geom_label(
     aes(x = Distinctness, 
         y = 299680, 
@@ -397,12 +406,14 @@ plot5 <- df_error %>%
            x = 1.5, 
            y = 299830, 
            label = c("Vacuum \nSpeed of Light"), 
-           size = 3) +
+           size = 3,
+           color = "white") +
     annotate("text", 
            x = 1.5, 
            y = 299980, 
            label = c("Michelson's Nominal \nSpeed of Light"), 
-           size = 3) +
+           size = 3,
+           color = "white") +
   annotate("rect", 
            xmin = 0.5, 
            xmax = 3.5, 
@@ -416,7 +427,7 @@ plot5 <- df_error %>%
     ## Warning: Ignoring unknown parameters: width
 
 ``` r
-plot5 + labs(title = "Vacuum Velocity Error by Distinctness", y = "Average Vacuum Velocity of Light (km/s)")
+plot5 + labs(title = "Vacuum Velocity Uncertainty by Distinctness", y = "Average Vacuum Velocity of Light (km/s)", subtitle = "Whisker represent calculated uncertainty in the mean per Distinctness")
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/q4-task-5.png)<!-- -->
