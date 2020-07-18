@@ -1,4 +1,10 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+||||||| merged common ancestors
+=======
+[![Build Status](https://travis-ci.com/zdelrosario/data-science-curriculum.svg?branch=master)](https://travis-ci.com/zdelrosario/data-science-curriculum)
+
+>>>>>>> 5b8dbd7c45487a25ec245a33b899320a103695af
 # data-science-curriculum
 
 This is a curriculum of **open-source** data science exercises, intended to take a student from zero coding experience to basic data science literacy. These exercises are heavily inspired by the (discontinued) [Data Challenge Lab](https://dcl-docs.stanford.edu/home/) at Stanford University and rely on the [Tidyverse](https://www.tidyverse.org/).
