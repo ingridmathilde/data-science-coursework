@@ -66,6 +66,7 @@ for more information.
 library(tidyverse)
 library(googlesheets4)
 library(cowplot)
+library(moments)
 
 url <- "https://docs.google.com/spreadsheets/d/1av_SXn4j0-4Rk0mQFik3LLr-uf0YdA06i3ugE6n-Zdo/edit?usp=sharing"
 
@@ -241,7 +242,8 @@ df_error <- df_q2 %>%
     min = min(VelocityVacuum),
     mean_uncertainty = (max-min)/(2*sqrt(count)),
     rel_uncertainty = mean_uncertainty/avg,
-    rel_err = abs((avg - LIGHTSPEED_VACUUM)/LIGHTSPEED_VACUUM)*100
+    rel_err = abs((avg - LIGHTSPEED_VACUUM)/LIGHTSPEED_VACUUM)*100,
+    skew = round(skewness(VelocityVacuum),3)
     )
 ```
 
@@ -252,11 +254,11 @@ df_error %>%
   knitr::kable()
 ```
 
-| Distinctness | count |      avg |    max |    min | mean\_uncertainty | rel\_uncertainty |  rel\_err |
-| :----------- | ----: | -------: | -----: | -----: | ----------------: | ---------------: | --------: |
-| 1            |    15 | 299900.0 | 299992 | 299712 |          36.14784 |        0.0001205 | 0.0358721 |
-| 2            |    39 | 299950.5 | 300162 | 299742 |          33.62691 |        0.0001121 | 0.0527043 |
-| 3            |    46 | 299953.7 | 300092 | 299812 |          20.64187 |        0.0000688 | 0.0537976 |
+| Distinctness | count |      avg |    max |    min | mean\_uncertainty | rel\_uncertainty |  rel\_err |    skew |
+| :----------- | ----: | -------: | -----: | -----: | ----------------: | ---------------: | --------: | ------: |
+| 1            |    15 | 299900.0 | 299992 | 299712 |          36.14784 |        0.0001205 | 0.0358721 | \-1.020 |
+| 2            |    39 | 299950.5 | 300162 | 299742 |          33.62691 |        0.0001121 | 0.0527043 |   0.216 |
+| 3            |    46 | 299953.7 | 300092 | 299812 |          20.64187 |        0.0000688 | 0.0537976 |   0.078 |
 
 ***Observations***:
 
@@ -279,12 +281,12 @@ between Michelson’s estimate and `LIGHTSPEED_VACUUM`?
 ## Your code here!
 
 dat_text <- data.frame(
-  label = paste("N = ",as.character(pull(df_error,2))),
+  label1 = paste("N = ",as.character(pull(df_error,2))),
+  label2 = paste("skew = ", as.character(pull(df_error, "skew"))),
   Distinctness   = pull(df_error,1),
   x     = c(299950, 299960, 299970),
-  y     = c(0.001, 0.0012, 0.0014)
+  y     = c(0.002, 0.0022, 0.0024)
 )
-
 
 plot1 <- df_q2 %>% 
   ggplot() +
@@ -302,7 +304,11 @@ plot1 <- df_q2 %>%
   geom_vline(xintercept = LIGHTSPEED_VACUUM) +
   geom_text(
     data= dat_text,
-    mapping = aes(x = x, y = y, label = label) 
+    mapping = aes(x = x, y = y, label = label1) 
+  ) +
+  geom_text(
+    data= dat_text,
+    mapping = aes(x = x, y = y-0.001, label = label2) 
   )
 
 plot3 <- df_q2 %>% 
@@ -366,6 +372,27 @@ plot5 <- df_error %>%
     ## Warning: Ignoring unknown parameters: width
 
 ``` r
+plot9 <- df_q2 %>%
+  ggplot() +
+  geom_hline(yintercept = LIGHTSPEED_VACUUM) +
+  geom_point(aes(x = Date, alpha = Temp, color = Distinctness, y = Velocity)) +
+  geom_smooth(aes(x = Date, y = Velocity))
+
+plot10 <- df_q2 %>% 
+  ggplot() +
+  geom_density(
+    aes(Temp, 
+        color = Distinctness, 
+        group = Distinctness)
+    ) +
+  facet_grid(Distinctness~.) +
+  geom_text(
+    data= dat_text,
+    mapping = aes(x = c(80,80,80), y = c(0.04, 0.02, 0.01), label = label1)
+  )
+```
+
+``` r
 plot1 + labs(title = "The different groups organized by distinctness follow a \nroughly normal distribution", y = "Vacuum Velocity of Light (km/s)")
 ```
 
@@ -373,17 +400,91 @@ plot1 + labs(title = "The different groups organized by distinctness follow a \n
 
 ***Observations for first plot***
 
+  - **Distinctness groups 2 and 3 demonstrate a tendency towards a
+    normal distribution indicating that his data is clustered enough to
+    demonstrate a clear mean.**
+  - **Distinctness group 1 demonstrated a skew to the left but I wonder
+    if this is because a larger sample size would resolve the skew.**
+
+<!-- end list -->
+
 ``` r
-plot3 + labs(title = "Density of Velocity of Light (measured but not corrected) vs Temperature", subtitle = "True Vacuum Velocity of Light denoted with a white horizontal line", x = "Velocity (km/s)", y = "Temperature (degrees C)")
+plot3 + labs(title = "Density of Velocity of Light (measured but not corrected) vs Temperature", subtitle = "True Vacuum Velocity of Light denoted with a black horizontal line", y = "Vacuum Velocity of Light (km/s)", x = "Temperature (degrees F)")
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/second%20plot-1.png)<!-- -->
+
+***Observations for second plot***
+
+  - **There was not a clear and strong relationship between temperature
+    and distinctness.**
+  - **That being said, it would seem that the images were most distinct
+    (3) at temperatures between 70-80 degrees F. The question is - was
+    this good luck, is there a correlation, or could it be a cause?**
+  - **Given the high human effort to perform tests, I wonder if simply
+    comfortability (that is to say, most people are comfortable in 70-80
+    degree F environments, hotter is sticky and gross).**
+  - **Alternatively, with research I see that humidity affects the
+    refractive index of air, so perhaps this was at play on particularly
+    cool or hot days.**
+
+<!-- end list -->
 
 ``` r
 plot5 + labs(title = "Vacuum Velocity Uncertainty by Distinctness", y = "Average Vacuum Velocity of Light (km/s)", subtitle = "Whisker represent calculated uncertainty in the mean per Distinctness")
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/third%20plot-1.png)<!-- -->
+
+***Observations for third plot***
+
+  - **Michelson’s nominal speed of light looks well informed by his data
+    set: The Michelson’s nominal speed of light is very similar to the
+    mean of Distinctness group 2 and 3.**
+  - **The uncertainty in his measurement (aka range/2) is large enough
+    to capture the true vacuum speed of light.**
+  - **Michelson’s estimated range is well informed by his data set - it
+    accomodated both the estimated measurement errors (outlined in his
+    [report](https://play.google.com/books/reader?id=343nAAAAMAAJ&hl=en&pg=GBS.PA115))
+    and the uncertainty in the mean (demonstrated with the whiskers).**
+
+<!-- end list -->
+
+``` r
+plot9 + labs(title = "Velocity measurements approached the true vacuum velocity of light over time", subtitle = "True Vacuum Velocity of Light denoted with a black horizontal line", y = "Measured Velocity of Light (km/s)", x = "Date")
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+![](c02-michelson-assignment_files/figure-gfm/fourth%20plot-1.png)<!-- -->
+
+***Observations for fourth plot***
+
+  - **The velocity measurements (before correcting for temperature)
+    approached the true vacuum velocity of light - could this be because
+    the testers were more used to the test procedure, were having a
+    great couple of days, or was something meteorological going on?**
+  - **It looks like the temperature vs distinctness is not concentrated
+    - bu how about I confirm?**
+
+<!-- end list -->
+
+``` r
+plot10 + labs(title = "The density of the high distinctness group (3) is forming a normal distribution", subtitle = "However being in this temperature range does not mean the distinctness will be high", x = "Temperature (degree F)")
+```
+
+![](c02-michelson-assignment_files/figure-gfm/fifth%20plot-1.png)<!-- -->
+
+***Observations for fifth plot***
+
+  - **Distinctness group 3 images more frequently occur when the
+    temperature is about 75-98 degrees F - and it is following a normal
+    distribution with a skew to the right.**
+  - **Other distinctness groups do not demonstrate a clear
+    distribution.**
+  - **This is where I got tired so I stopped working here\! Upon
+    reflection, this plot just re-terates my density plot. So this is a
+    good example of having few but powerful plots\!**
 
 ## Bibliography
 
@@ -393,3 +494,8 @@ plot5 + labs(title = "Vacuum Velocity Uncertainty by Distinctness", y = "Average
   - \[2\] Henrion and Fischhoff, [Assessing Uncertainty in Physical
     Constants](https://www.cmu.edu/epp/people/faculty/research/Fischoff-Henrion-Assessing%20uncertainty%20in%20physical%20constants.pdf)
     (1986)
+  - \[3\] <https://brownmath.com/stat/shape.htm#>
+  - \[4\]
+    <https://www.physics.upenn.edu/sites/default/files/Managing%20Errors%20and%20Uncertainty.pdf>
+  - \[5\]
+    <https://www.bellevuecollege.edu/physics/resources/measure-sigfigsintro/b-acc-prec-unc/>
