@@ -1,7 +1,7 @@
 ---
 title: "Aluminum Data"
-author: "(Your name here)"
-date: 2020-
+author: "ingridmathilde"
+date: 2020-07-18
 output:
   github_document:
     toc: true
@@ -64,6 +64,8 @@ df_stang
 
 Note that these data are not tidy! The data in this form are convenient for reporting in a table, but are not ideal for analysis.
 
+# Question 1
+
 __q1__ Tidy `df_stang` to produce `df_stang_long`. You should have column names `thick, alloy, angle, E, mu`. Make sure the `angle` variable is of correct type. Filter out any invalid values.
 
 *Hint*: You can reshape in one `pivot` using the `".value"` special value for `names_to`.
@@ -71,7 +73,15 @@ __q1__ Tidy `df_stang` to produce `df_stang_long`. You should have column names 
 ```{r q1-task}
 ## TASK: Tidy `df_stang`
 df_stang_long <-
-  df_stang
+  df_stang %>% 
+  pivot_longer(
+    c(-thick, -alloy),
+    names_to = c(".value", "angle"),
+    names_sep = "_",
+    values_drop_na = TRUE
+  ) %>% 
+  mutate(angle = as.integer(angle)) %>% 
+  filter(E > 0)
 
 df_stang_long
 ```
@@ -106,21 +116,28 @@ print("Very good!")
 __q2__ Perform a basic EDA on the aluminum data *without visualization*. Use your analysis to answer the questions under *observations* below. In addition, add your own question that you'd like to answer about the data.
 
 ```{r q2-task}
-##
+df_stang_long
+
+df_stang_long %>% 
+  group_by(angle) %>% 
+  summarise_all(list(mean = mean, min = min, max = max))
+
+df_stang_long %>% 
+  group_by(thick) %>% 
+  summarise_all(list(mean = mean, min = min, max = max))
+
+df_stang_long %>% 
+  group_by(alloy, angle) %>% 
+  summarise_all(list(mean = mean, min = min, max = max))
 ```
 
 **Observations**:
 
-- Is there "one true value" for the material properties of Aluminum?
-- How many aluminum alloys were tested? How do you know?
-- What angles were tested?
-- What thicknesses were tested?
-- (Write your own question here)
-- No; we see a variety of values for `E` and `mu`.
-- Just one alloy: al_24st
-- Angles: 0, 45, 90 (degrees)
-- Thicknesses: 0.022, 0.032, 0.064, 0.081 (in)
-- I'm curious if the properties `E, mu` vary with thickness
+* **There is no one true value for the material properties of Aluminum - it depends on many factors (like those listed above).**
+* **One aluminim alloy was tested - we see this when grouping by angle.**
+* **Angles 0, 45, and 90 were tested.**
+* **Thicknesses 0.022, 0.032, 0.064, and 0.081 were tested.**
+* **How does angle and thickness affect the results?**
 
 ## Visualize
 <!-- ------------------------- -->
@@ -129,6 +146,18 @@ __q3__ Create a visualization to investigate your question from q1 above. Can yo
 
 ```{r q3-task}
 ## TASK: Investigate your question from q1 here
+df_stang_long %>% 
+  ggplot() +
+  geom_point(aes(x = thick, y = E, color = angle))
+
+df_stang_long %>% 
+  ggplot() +
+  geom_point(aes(x = thick, y = mu, color = angle))
+
+df_stang_long %>% 
+  ggplot() +
+  geom_point(aes(x = E, y = mu, color = angle))
+
 ```
 
 **Observations**:
