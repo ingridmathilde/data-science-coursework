@@ -116,7 +116,8 @@ print("Very good!")
 __q2__ Perform a basic EDA on the aluminum data *without visualization*. Use your analysis to answer the questions under *observations* below. In addition, add your own question that you'd like to answer about the data.
 
 ```{r q2-task}
-df_stang_long
+df_stang_long_factors <- df_stang_long %>%
+  mutate(angle_cat = as.factor(angle))
 
 df_stang_long %>% 
   group_by(angle) %>% 
@@ -146,23 +147,47 @@ __q3__ Create a visualization to investigate your question from q1 above. Can yo
 
 ```{r q3-task}
 ## TASK: Investigate your question from q1 here
-df_stang_long %>% 
+df_stang_long_factors %>% 
   ggplot() +
-  geom_point(aes(x = thick, y = E, color = angle))
+  geom_hline(aes(yintercept = 10000)) +
+  geom_boxplot(aes(x = thick, y = E, group = thick)) +
+  geom_point(aes(x = thick, y = E, color = angle_cat))
 
-df_stang_long %>% 
-  ggplot() +
-  geom_point(aes(x = thick, y = mu, color = angle))
 
-df_stang_long %>% 
+df_stang_long_factors %>% 
   ggplot() +
-  geom_point(aes(x = E, y = mu, color = angle))
+  geom_hline(aes(yintercept = 0.32)) +
+  geom_boxplot(aes(x = thick, y = mu, group = thick)) +
+  geom_point(aes(x = thick, y = mu, color = angle_cat))
+
+df_stang_long_factors %>% 
+  ggplot() +
+  geom_hline(aes(yintercept = 10000)) +
+  geom_boxplot(aes(x = angle, y = E, group = angle)) +
+  geom_smooth(aes(x = angle, y = E)) +
+  geom_point(aes(x = angle, y = E, color = as.factor(thick)))
+  
+df_stang_long_factors %>% 
+  ggplot() +
+  geom_hline(aes(yintercept = 0.32)) +
+  geom_boxplot(aes(x = angle, y = mu, group = angle)) +
+  geom_smooth(aes(x = angle, y = mu)) +
+  geom_point(aes(x = angle, y = mu, color = as.factor(thick)))
+
+df_stang_long_factors %>% 
+  ggplot() +
+  geom_point(aes(x = 10000, y = 0.32), color = "black", size = 2) +
+  geom_point(aes(x = E, y = mu, color = as.factor(thick))) +
+  facet_grid(.~angle_cat)
 
 ```
 
 **Observations**:
 
-- (Address your question from q1 here)
+* **At small thicknesses (< 0.08), the Young's modulus and Poisson's ratio is slightly higher than the frequently quotes values (regardless of angle). For rolling, impurities may be introduced and occupy a greater proprtion of the overall thickness and therefore measurement of properties. Further, at smaller thicknesses, the surface treatment/finish/any edge properties will also occupy a greater proportion of the overall thickness and therefore measurement of properties.**
+* **This means that the material's properties are affected by the thickness and at a certain threshold are more affected by thickness.**
+* **At the thickness ranges measured, angle presents a minimal affect on the measurement of Young's modulus.**
+* **At the thickness ranges measured, angle presents an affect on the measurement of Poisson's ratio - namely it is slightly higher at 45 degrees - not sure why yet.**
 
 __q4__ Consider the following statement:
 
