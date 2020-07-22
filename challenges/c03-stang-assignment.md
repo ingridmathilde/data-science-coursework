@@ -8,10 +8,13 @@ ingridmathilde
       - [Team](#team)
       - [Due Date](#due-date)
   - [Loading and Wrangle](#loading-and-wrangle)
-  - [Question 1](#question-1)
+      - [Question 1](#question-1)
   - [EDA](#eda)
       - [Initial checks](#initial-checks)
-      - [Visualize](#visualize)
+          - [Question 2](#question-2)
+  - [Visualize](#visualize)
+      - [Question 3](#question-3)
+      - [Question 4](#question-4)
   - [References](#references)
 
 *Purpose*: When designing structures such as bridges, boats, and planes,
@@ -69,14 +72,14 @@ for more information.
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──
+    ## ── Attaching packages ────────────────────────────────────────────────────────── tidyverse 1.3.0 ──
 
     ## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
     ## ✓ tibble  3.0.1     ✓ dplyr   1.0.0
     ## ✓ tidyr   1.1.0     ✓ stringr 1.4.0
     ## ✓ readr   1.3.1     ✓ forcats 0.5.0
 
-    ## ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ───────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
 
@@ -140,7 +143,7 @@ df_stang
 Note that these data are not tidy\! The data in this form are convenient
 for reporting in a table, but are not ideal for analysis.
 
-# Question 1
+## Question 1
 
 **q1** Tidy `df_stang` to produce `df_stang_long`. You should have
 column names `thick, alloy, angle, E, mu`. Make sure the `angle`
@@ -225,6 +228,8 @@ print("Very good!")
 
 <!-- ------------------------- -->
 
+### Question 2
+
 **q2** Perform a basic EDA on the aluminum data *without visualization*.
 Use your analysis to answer the questions under *observations* below. In
 addition, add your own question that you’d like to answer about the
@@ -293,19 +298,21 @@ df_stang_long %>%
     ## 3 al_2…    90     0.0532 10289.   0.320     0.022  9900  0.31      0.081 10700
     ## # … with 1 more variable: mu_max <dbl>
 
-**Observations**:
+***Observations***:
 
-  - **There is no one true value for the material properties of Aluminum
-    - it depends on many factors (like those listed above).**
-  - **One aluminim alloy was tested - we see this when grouping by
+  - **There is no one true value for the material properties of
+    Aluminum-it depends on many factors (like those listed above).**
+  - **One aluminum alloy was tested - we see this when grouping by
     angle.**
   - **Angles 0, 45, and 90 were tested.**
   - **Thicknesses 0.022, 0.032, 0.064, and 0.081 were tested.**
   - **How does angle and thickness affect the results?**
 
-## Visualize
+# Visualize
 
 <!-- ------------------------- -->
+
+## Question 3
 
 **q3** Create a visualization to investigate your question from q1
 above. Can you find an answer to your question using the dataset? Would
@@ -313,32 +320,182 @@ you need additional information to answer your question?
 
 ``` r
 ## TASK: Investigate your question from q1 here
-df_stang_long_factors %>% 
+q3_plot1 <- df_stang_long_factors %>% 
   ggplot() +
-  geom_hline(aes(yintercept = 10000)) +
-  geom_boxplot(aes(x = thick, y = E, group = thick)) +
-  geom_point(aes(x = thick, y = E, color = angle_cat))
+  geom_hline(
+    aes(yintercept = 10000), 
+    linetype = "dashed", 
+    color = "blue") +
+  geom_boxplot(
+    aes(x = thick, 
+        y = E, 
+        group = thick
+        )
+    ) +
+  annotate("text", 
+           label = "Listed Poisson's Ratio", 
+           x = 0.05, 
+           y = 10050, 
+           color = "blue") +
+  labs(title = "Young's Modulus vs Thickness", 
+       subtitle = "Q3 - Plot 1", 
+       x = "Thickness (in)", 
+       y = "Young's Modulus (E)"
+       )
+
+
+q3_plot2 <- df_stang_long_factors %>% 
+  ggplot() +
+  geom_hline(
+    aes(
+      yintercept = 0.32
+      ), 
+    linetype = "dashed", 
+    color = "blue"
+    ) +
+  geom_boxplot(
+    aes(
+      x = thick, 
+      y = mu, 
+      group = thick
+      )
+    ) +
+  annotate("text", 
+           label = "Listed Young's Ratio", 
+           x = 0.05, 
+           y = 0.321, 
+           color = "blue") +
+  labs(title = "Poisson's Ratio vs Thickness",  
+       subtitle = "Q3 - Plot 2", 
+       x = "Thickness (in)", 
+       y = "Poisson's Ratio (mu)"
+       )
+
+q3_plot3 <- df_stang_long_factors %>% 
+  ggplot() +
+  geom_hline(
+    aes(yintercept = 10000), 
+    linetype = "dashed", 
+    color = "blue") +
+  geom_boxplot(
+    aes(x = angle, 
+        y = E, 
+        group = angle)
+    ) +
+  geom_smooth(
+    aes(x = angle, 
+      y = E
+      )
+    ) +
+  geom_point(
+    aes(x = angle, 
+        y = E, 
+        color = as.factor(thick)
+        )
+    ) +
+  annotate("text", 
+           label = "Listed Young's Modulus", 
+           x = 45, 
+           y = 9950, 
+           color = "blue") +
+  labs(title = "Poisson's Ratio vs Angle",  
+       subtitle = "Q3 - Plot 3", 
+       x = "Angle (degrees)", 
+       y = "Young's Modulus (E)"
+       )
+  
+q3_plot4 <- df_stang_long_factors %>% 
+  ggplot() +
+  geom_hline(aes(yintercept = 0.32), 
+             linetype = "dashed", 
+             color = "blue") +
+  geom_boxplot(
+    aes(
+      x = angle, 
+      y = mu, 
+      group = angle
+      )
+    ) +
+  geom_smooth(
+    aes(
+      x = angle, 
+      y = mu
+      )
+    ) +
+  geom_point(
+    aes(x = angle, 
+        y = mu, 
+        color = as.factor(thick)
+        )
+    ) +
+  annotate("text", 
+           label = "Listed Poisson's Ratio", 
+           x = 45, 
+           y = 0.315, 
+           color = "blue"
+           ) +
+  labs(title = "Poisson's Ratio vs Angle",  
+       subtitle = "Q3 - Plot 4", 
+       x = "Angle (degrees)", 
+       y = "Poisson's Ratio (mu)"
+       )
+
+q3_plot5 <- df_stang_long_factors %>% 
+  ggplot() +
+  geom_point(
+    aes(
+      x = 10000, 
+      y = 0.32
+      ), 
+    color = "blue", 
+    size = 2
+    ) +
+  geom_point(
+    aes(
+      x = E, 
+      y = mu, 
+      color = as.factor(thick)
+      )
+    ) +
+  annotate("text", 
+           label = "Quoted\n Properties", 
+           x = 10050, 
+           y = 0.323, 
+           color = "blue"
+           ) +
+  facet_grid(.~angle_cat) +
+    labs(title = "Young's Modulus vs Poisson's Ratio",  
+         subtitle = "Q3 - Plot 5", 
+         x = "Young's Modulus (E)", 
+         y = "Poisson's Ratio (mu)"
+         )
 ```
 
-![](c03-stang-assignment_files/figure-gfm/q3-task-1.png)<!-- -->
-
 ``` r
-df_stang_long_factors %>% 
-  ggplot() +
-  geom_hline(aes(yintercept = 0.32)) +
-  geom_boxplot(aes(x = thick, y = mu, group = thick)) +
-  geom_point(aes(x = thick, y = mu, color = angle_cat))
+q3_plot1
 ```
 
-![](c03-stang-assignment_files/figure-gfm/q3-task-2.png)<!-- -->
+![](c03-stang-assignment_files/figure-gfm/q3-plotting1-1.png)<!-- -->
+
+***Q3 - Plot 1 Observations***
+
+**For small thicknesses (\<0.08 in), the Young’s modulus is higher than
+the quoted value.**
 
 ``` r
-df_stang_long_factors %>% 
-  ggplot() +
-  geom_hline(aes(yintercept = 10000)) +
-  geom_boxplot(aes(x = angle, y = E, group = angle)) +
-  geom_smooth(aes(x = angle, y = E)) +
-  geom_point(aes(x = angle, y = E, color = as.factor(thick)))
+q3_plot2
+```
+
+![](c03-stang-assignment_files/figure-gfm/q3-plotting2-1.png)<!-- -->
+
+***Q3 - Plot 2 Observations***
+
+**For small thicknesses (\<0.08 in), the Poisson’s ratio is higher than
+the quoted value. For 0.081 in thickness, the measured Poisson’s ratio
+is slightly lower.**
+
+``` r
+q3_plot3
 ```
 
     ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
@@ -375,15 +532,15 @@ df_stang_long_factors %>%
     ## as.matrix(model.frame(delete.response(terms(object)), : There are other near
     ## singularities as well. 8181.2
 
-![](c03-stang-assignment_files/figure-gfm/q3-task-3.png)<!-- -->
+![](c03-stang-assignment_files/figure-gfm/q3-plotting3-1.png)<!-- -->
+
+***Q3 - Plot 3 Observations***
+
+**Angle does not seem to affect the measurement of Young’s modulus for
+the thicknesses.**
 
 ``` r
-df_stang_long_factors %>% 
-  ggplot() +
-  geom_hline(aes(yintercept = 0.32)) +
-  geom_boxplot(aes(x = angle, y = mu, group = angle)) +
-  geom_smooth(aes(x = angle, y = mu)) +
-  geom_point(aes(x = angle, y = mu, color = as.factor(thick)))
+q3_plot4
 ```
 
     ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
@@ -420,28 +577,41 @@ df_stang_long_factors %>%
     ## as.matrix(model.frame(delete.response(terms(object)), : There are other near
     ## singularities as well. 8181.2
 
-![](c03-stang-assignment_files/figure-gfm/q3-task-4.png)<!-- -->
+![](c03-stang-assignment_files/figure-gfm/q3-plotting4-1.png)<!-- -->
+
+***Q3 - Plot 3 Observations***
+
+**Angle does seem to affect the measurement of Poisson’s ratio for the
+thicknesses. This is very curious but I can’t explain it at the moment.
+Based on the
+[literature](https://nvlpubs.nist.gov/nistpubs/jres/37/jresv37n4p211_A1b.pdf),
+this plot consistent with a homogenous aniostropic material - meaning
+that a material’s properties do change according to direction. Includes
+the points themselves - note that while the 0.081 in sheets are always
+exhibit the lowest Poisson’s ratio, the thinner sheets are scattered
+above in no consistent order.**
 
 ``` r
-df_stang_long_factors %>% 
-  ggplot() +
-  geom_point(aes(x = 10000, y = 0.32), color = "black", size = 2) +
-  geom_point(aes(x = E, y = mu, color = as.factor(thick))) +
-  facet_grid(.~angle_cat)
+q3_plot5
 ```
 
-![](c03-stang-assignment_files/figure-gfm/q3-task-5.png)<!-- -->
+![](c03-stang-assignment_files/figure-gfm/q3-plotting5-1.png)<!-- -->
 
-**Observations**:
+***Q3 - Plot 3 Observations***
+
+**There is no consistent order except that the thicker sheet (0.081 in)
+*tends* to be closer to the quoted property values.**
+
+***Overall Observations***:
 
   - **At small thicknesses (\< 0.08), the Young’s modulus and Poisson’s
-    ratio is slightly higher than the frequently quotes values
-    (regardless of angle). For rolling, impurities may be introduced and
-    occupy a greater proprtion of the overall thickness and therefore
-    measurement of properties. Further, at smaller thicknesses, the
-    surface treatment/finish/any edge properties will also occupy a
-    greater proportion of the overall thickness and therefore
-    measurement of properties.**
+    ratio is slightly higher than the quoted values (regardless of
+    angle). For rolling, impurities may be introduced and occupy a
+    greater proprtion of the overall thickness and therefore measurement
+    of properties. Further, at smaller thicknesses, the surface
+    treatment/finish/any edge properties will also occupy a greater
+    proportion of the overall thickness and therefore measurement of
+    properties.**
   - **This means that the material’s properties are affected by the
     thickness and at a certain threshold are more affected by
     thickness.**
@@ -450,6 +620,8 @@ df_stang_long_factors %>%
   - **At the thickness ranges measured, angle presents an affect on the
     measurement of Poisson’s ratio - namely it is slightly higher at 45
     degrees - not sure why yet.**
+
+## Question 4
 
 **q4** Consider the following statement:
 
@@ -466,16 +638,20 @@ Is this evidence *conclusive* one way or another? Why or why not?
 ## NOTE: No need to change; run this chunk
 df_stang_long %>%
 
-  ggplot(aes(mu, E, color = as_factor(thick))) +
-  geom_point(size = 3) +
+  ggplot() +
+  geom_point(aes(mu, E, color = as_factor(thick)), size = 3) +
+  geom_smooth(aes(x = mu, y = E), method = lm, se = FALSE, color = "black") +
   theme_minimal()
 ```
 
+    ## `geom_smooth()` using formula 'y ~ x'
+
 ![](c03-stang-assignment_files/figure-gfm/q4-vis-1.png)<!-- -->
 
-**Observations**:
+***Observations***:
 
-  - Does this graph support or contradict the claim above?
+**The plot above demonstrates that it is not an intensive property at
+very small thicknesses.**
 
 # References
 
