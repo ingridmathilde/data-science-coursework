@@ -164,14 +164,14 @@ q3_plot1 <- df_stang_long_factors %>%
         )
     ) +
   annotate("text", 
-           label = "Listed Poisson's Ratio", 
+           label = "Listed Modulus of Elasticity", 
            x = 0.05, 
            y = 10550, 
            color = "blue") +
   labs(title = "Modulus of Elasticity vs Thickness", 
        subtitle = "Q3 - Plot 1", 
        x = "Thickness (in)", 
-       y = "Young's Modulus (E)"
+       y = "Modulus of Elasticity"
        )
 
 
@@ -232,7 +232,7 @@ q3_plot3 <- df_stang_long_factors %>%
   labs(title = "Modulus of Elasticity vs Angle",  
        subtitle = "Q3 - Plot 3", 
        x = "Angle (degrees)", 
-       y = "Young's Modulus (E)"
+       y = "Modulus of Elasticity"
        )
   
 q3_plot4 <- df_stang_long_factors %>% 
