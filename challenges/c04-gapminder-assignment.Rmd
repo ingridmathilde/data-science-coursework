@@ -263,6 +263,7 @@ gapminder %>%
        )
   
 ```
+
 ***Observations***
 * **In 1952 and in 2007, comparatively higher GDP is associated with comparatively higher life expectancy.**
 * **In 1952, the comparaitve disparity in life expectancy and GDP was smaller than those in 2007.**
