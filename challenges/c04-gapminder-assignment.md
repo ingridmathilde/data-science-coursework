@@ -404,11 +404,16 @@ gapminder %>%
 
 ![](c04-gapminder-assignment_files/figure-gfm/q5-task1-1.png)<!-- -->
 
-***Observations*** \* **In 1952 and in 2007, comparatively higher GDP is
-associated with comparatively higher life expectancy.** \* **In 1952,
-the comparaitve disparity in life expectancy and GDP was smaller than
-those in 2007.** \* **This is a trend in the world, but is this trend
-true for the ‘worst off’ countries in the world?**
+***Observations***
+
+  - **In 1952 and in 2007, comparatively higher GDP is associated with
+    comparatively higher life expectancy.**
+  - **In 1952, the comparaitve disparity in life expectancy and GDP was
+    smaller than those in 2007.**
+  - **This is a trend in the world, but is this trend true for the
+    ‘worst off’ countries in the world?**
+
+<!-- end list -->
 
 ``` r
 ## TASK: Your second graph
