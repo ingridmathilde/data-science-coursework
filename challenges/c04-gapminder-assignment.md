@@ -143,12 +143,12 @@ summary(gapminder)
 **Observations**:
 
   - **This dataset contains the following information:**
-  - **Country**
-  - **Continent**
-  - **Year**
-  - **Life Expentancy**
-  - **Population**
-  - **GDP per capita**
+      - **Country**
+      - **Continent**
+      - **Year**
+      - **Life Expentancy**
+      - **Population**
+      - **GDP per capita**
 
 **q1** Determine the most and least recent years in the `gapminder`
 dataset.
@@ -230,11 +230,11 @@ gapminder %>%
   - **Generally, Oceania has a greater GDP per Capita, followed by
     Europe, then the Americas, then Asia, then Africa.**
   - **Per continent there are outliers:**
-  - **Africa: 3**
-  - **Americas: 3**
-  - **Asia : 2**
-  - **Europe : 1**
-  - **Oceania: 0**
+      - **Africa: 3**
+      - **Americas: 3**
+      - **Asia : 2**
+      - **Europe : 1**
+      - **Oceania: 0**
   - **The GDP per Capita is the most spread for Europe, followed by
     Asia, then Americas, then Africa, then Oceania.**
 
@@ -302,15 +302,15 @@ gapminder %>%
 
   - **My solution is quick and dirty but hey, it works.**
   - **The countries are:**
-  - **Kuwait**
-  - **Switzerland**
-  - **Bahrain**
-  - **United States**
-  - **Canada**
-  - **Venezuela**
-  - **South Africa**
-  - **Gabon**
-  - **Angola**
+      - **Kuwait**
+      - **Switzerland**
+      - **Bahrain**
+      - **United States**
+      - **Canada**
+      - **Venezuela**
+      - **South Africa**
+      - **Gabon**
+      - **Angola**
 
 **q4** Create a plot similar to yours from q2 studying both `year_min`
 and `year_max`. Find a way to highlight the outliers from q3 on your
@@ -364,14 +364,14 @@ gapminder %>%
 **Observations**:
 
   - **The GDP across the world has increased from 1952-2007.**
-  - \*\* The variability of GDP has increased within each continent from
-    1952-2007.\*\*
+  - **The variability of GDP has increased within each continent from
+    1952-2007.**
   - **The countries that continue to be outliers compared to their
     continent are:**
-  - **Gabon**
-  - **South Africa**
-  - **United States**
-  - **Canada**
+      - **Gabon**
+      - **South Africa**
+      - **United States**
+      - **Canada**
 
 # Your Own EDA
 
