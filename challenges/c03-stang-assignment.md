@@ -323,7 +323,7 @@ you need additional information to answer your question?
 q3_plot1 <- df_stang_long_factors %>% 
   ggplot() +
   geom_hline(
-    aes(yintercept = 10000), 
+    aes(yintercept = 10500), 
     linetype = "dashed", 
     color = "blue") +
   geom_boxplot(
@@ -335,9 +335,9 @@ q3_plot1 <- df_stang_long_factors %>%
   annotate("text", 
            label = "Listed Poisson's Ratio", 
            x = 0.05, 
-           y = 10050, 
+           y = 10550, 
            color = "blue") +
-  labs(title = "Young's Modulus vs Thickness", 
+  labs(title = "Modulus of Elasticity vs Thickness", 
        subtitle = "Q3 - Plot 1", 
        x = "Thickness (in)", 
        y = "Young's Modulus (E)"
@@ -348,7 +348,7 @@ q3_plot2 <- df_stang_long_factors %>%
   ggplot() +
   geom_hline(
     aes(
-      yintercept = 0.32
+      yintercept = 0.33
       ), 
     linetype = "dashed", 
     color = "blue"
@@ -361,9 +361,9 @@ q3_plot2 <- df_stang_long_factors %>%
       )
     ) +
   annotate("text", 
-           label = "Listed Young's Ratio", 
+           label = "Listed Poisson's Ratio", 
            x = 0.05, 
-           y = 0.321, 
+           y = 0.332, 
            color = "blue") +
   labs(title = "Poisson's Ratio vs Thickness",  
        subtitle = "Q3 - Plot 2", 
@@ -374,7 +374,7 @@ q3_plot2 <- df_stang_long_factors %>%
 q3_plot3 <- df_stang_long_factors %>% 
   ggplot() +
   geom_hline(
-    aes(yintercept = 10000), 
+    aes(yintercept = 10500), 
     linetype = "dashed", 
     color = "blue") +
   geom_boxplot(
@@ -394,11 +394,11 @@ q3_plot3 <- df_stang_long_factors %>%
         )
     ) +
   annotate("text", 
-           label = "Listed Young's Modulus", 
+           label = "Listed Modulus of Elasticity", 
            x = 45, 
-           y = 9950, 
+           y = 10550, 
            color = "blue") +
-  labs(title = "Poisson's Ratio vs Angle",  
+  labs(title = "Modulus of Elasticity vs Angle",  
        subtitle = "Q3 - Plot 3", 
        x = "Angle (degrees)", 
        y = "Young's Modulus (E)"
@@ -406,7 +406,7 @@ q3_plot3 <- df_stang_long_factors %>%
   
 q3_plot4 <- df_stang_long_factors %>% 
   ggplot() +
-  geom_hline(aes(yintercept = 0.32), 
+  geom_hline(aes(yintercept = 0.33), 
              linetype = "dashed", 
              color = "blue") +
   geom_boxplot(
@@ -431,7 +431,7 @@ q3_plot4 <- df_stang_long_factors %>%
   annotate("text", 
            label = "Listed Poisson's Ratio", 
            x = 45, 
-           y = 0.315, 
+           y = 0.335, 
            color = "blue"
            ) +
   labs(title = "Poisson's Ratio vs Angle",  
@@ -444,8 +444,8 @@ q3_plot5 <- df_stang_long_factors %>%
   ggplot() +
   geom_point(
     aes(
-      x = 10000, 
-      y = 0.32
+      x = 10500, 
+      y = 0.33
       ), 
     color = "blue", 
     size = 2
@@ -459,14 +459,14 @@ q3_plot5 <- df_stang_long_factors %>%
     ) +
   annotate("text", 
            label = "Quoted\n Properties", 
-           x = 10050, 
-           y = 0.323, 
+           x = 10550, 
+           y = 0.335, 
            color = "blue"
            ) +
   facet_grid(.~angle_cat) +
-    labs(title = "Young's Modulus vs Poisson's Ratio",  
+    labs(title = "Modulus of Elasticity vs Poisson's Ratio",  
          subtitle = "Q3 - Plot 5", 
-         x = "Young's Modulus (E)", 
+         x = "Modulus of Elasticity (E)", 
          y = "Poisson's Ratio (mu)"
          )
 ```
@@ -479,8 +479,9 @@ q3_plot1
 
 ***Q3 - Plot 1 Observations***
 
-**For small thicknesses (\<0.08 in), the Young’s modulus is higher than
-the quoted value.**
+**Used [link](http://ssrl-uark.com/MILHDBK5H.pdf) for property
+reference.** **For larger thicknesses (\>0.08 in), the Young’s modulus
+is lower than the quoted value.**
 
 ``` r
 q3_plot2
@@ -490,9 +491,8 @@ q3_plot2
 
 ***Q3 - Plot 2 Observations***
 
-**For small thicknesses (\<0.08 in), the Poisson’s ratio is higher than
-the quoted value. For 0.081 in thickness, the measured Poisson’s ratio
-is slightly lower.**
+**For larger thicknesses (\<0.08 in), the Poisson’s ratio is lower than
+the quoted value.**
 
 ``` r
 q3_plot3
@@ -600,12 +600,12 @@ q3_plot5
 ***Q3 - Plot 3 Observations***
 
 **There is no consistent order except that the thicker sheet (0.081 in)
-*tends* to be closer to the quoted property values.**
+*tends* to be further from the quoted property values.**
 
 ***Overall Observations***:
 
-  - **At small thicknesses (\< 0.08), the Young’s modulus and Poisson’s
-    ratio is slightly higher than the quoted values (regardless of
+  - **At large thicknesses (\> 0.08), the Young’s modulus and Poisson’s
+    ratio is slightly lower than the quoted values (regardless of
     angle). For rolling, impurities may be introduced and occupy a
     greater proprtion of the overall thickness and therefore measurement
     of properties. Further, at smaller thicknesses, the surface
@@ -619,7 +619,7 @@ q3_plot5
     on the measurement of Young’s modulus.**
   - **At the thickness ranges measured, angle presents an affect on the
     measurement of Poisson’s ratio - namely it is slightly higher at 45
-    degrees - not sure why yet.**
+    degrees - seems to indicate the samples are not isotropic.**
 
 ## Question 4
 
