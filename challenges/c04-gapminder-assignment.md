@@ -389,16 +389,25 @@ to pose new questions about the data.
 ## TASK: Your first graph
 
 gapminder %>%
-  filter(year == year_max | year == year_min) %>% 
+  filter(year == year_max | year == year_min) %>%
+  group_by(year) %>% 
+  mutate(
+    gdp_year_median = median(gdpPercap), 
+    life_year_median = median(lifeExp), 
+    comp_gdp = gdpPercap/gdp_year_median,
+    comp_life = lifeExp/life_year_median
+    ) %>% 
   ggplot(
     aes(
-      x = gdpPercap/mean(gdpPercap), 
-      y = lifeExp/mean(lifeExp)
+      x = comp_gdp, 
+      y = comp_life
       )
     ) +
   geom_point(aes(color = as.factor(year))) +
   labs(title = "Comparative GDP per capita vs Comparative Life Expectancy", 
-       subtitle = "Question 5 - Plot 1 "
+       subtitle = "Question 5 - Plot 1 ",
+       x = "GDP/median GDP per capita per year",
+       y = "Life Expectancy/median Life Expectancy per year"
        )
 ```
 
@@ -406,10 +415,12 @@ gapminder %>%
 
 ***Observations***
 
-  - **In 1952 and in 2007, comparatively higher GDP is associated with
-    comparatively higher life expectancy.**
-  - **In 1952, the comparaitve disparity in life expectancy and GDP was
-    smaller than those in 2007.**
+  - **In 1952, comparatively higher GDP is associated with comparatively
+    higher life expectancy.**
+  - **In 2007, comparatively higher GDP does not confer a significantly
+    higher life expectancy.**
+  - **In 1952, the comparative disparity in life expectancy was higher
+    and GDP was was about the same than those in 2007.**
   - **This is a trend in the world, but is this trend true for the
     ‘worst off’ countries in the world?**
 
@@ -419,11 +430,11 @@ gapminder %>%
 ## TASK: Your second graph
 lowest_gdp <- gapminder %>%
   filter(year == year_min) %>% 
-  arrange(gdpPercap)
+  arrange(desc(gdpPercap))
 
 lowest_life <- gapminder %>%
   filter(year == year_min) %>% 
-  arrange(lifeExp)
+  arrange(desc(lifeExp))
 
 gapminder %>% 
   filter(country == "Lesotho") %>% 
@@ -439,16 +450,42 @@ gapminder %>%
 
 ``` r
 gapminder %>% 
+  filter(country == "Kuwait") %>% 
+  ggplot(aes(x = year, y = gdpPercap)) +
+  geom_line(color = "green") +
+  geom_point(aes(alpha = lifeExp)) +
+  labs(
+    title = "Kuwait's (the richest country in 1952)\n changes in GDP per capita and Life Expectancy",
+    subtitle = "Question 5 - Plot 3")
+```
+
+![](c04-gapminder-assignment_files/figure-gfm/q5-task2-2.png)<!-- -->
+
+``` r
+gapminder %>% 
   filter(country == "Afghanistan") %>% 
   ggplot(aes(x = year, y = gdpPercap)) +
   geom_line(color = "red") +
   geom_point(aes(alpha = lifeExp)) +
   labs(
     title = "Afghanistan's (the country with the lowest life expectancy in 1952)\n changes in GDP per capita and Life Expectancy",
-    subtitle = "Question 5 - Plot 3")
+    subtitle = "Question 5 - Plot 4")
 ```
 
-![](c04-gapminder-assignment_files/figure-gfm/q5-task2-2.png)<!-- -->
+![](c04-gapminder-assignment_files/figure-gfm/q5-task2-3.png)<!-- -->
+
+``` r
+gapminder %>% 
+  filter(country == "Norway") %>% 
+  ggplot(aes(x = year, y = gdpPercap)) +
+  geom_line(color = "yellow") +
+  geom_point(aes(alpha = lifeExp)) +
+  labs(
+    title = "Norway's (the country with the highest life expectancy in 1952)\n changes in GDP per capita and Life Expectancy",
+    subtitle = "Question 5 - Plot 5")
+```
+
+![](c04-gapminder-assignment_files/figure-gfm/q5-task2-4.png)<!-- -->
 
 ***Observations***
 
@@ -458,6 +495,9 @@ gapminder %>%
   - **For the ‘worst-off’ countries in the world in 1952, there is not a
     direct correlation between GPD per capita and life expectancy as it
     changed over time.**
+  - **Meanwhile, for countries that started rich or with a higher life
+    expectancy, the changes in fortune were low enough that again this
+    correlation does not hold.**
   - **Obviously GDP is not the only factor at play - war, famine, health
     crises can all affect life expectancy. Both
     [Afghanistan](https://en.wikipedia.org/wiki/History_of_Afghanistan#Contemporary_era_\(1973%E2%80%93present\))
@@ -477,12 +517,12 @@ describe_country <- gapminder %>%
   pivot_wider(names_from = year, values_from = c(lifeExp, gdpPercap))
 
 weirdos <- describe_country %>%
-  filter(gdpPercap_1952 > gdpPercap_2007 | lifeExp_1952 > lifeExp_2007)
+  filter(gdpPercap_1952 > gdpPercap_2007)
   
-  weirdos
+weirdos
 ```
 
-    ## # A tibble: 14 x 6
+    ## # A tibble: 12 x 6
     ##    country     continent lifeExp_1952 lifeExp_2007 gdpPercap_1952 gdpPercap_2007
     ##    <fct>       <fct>            <dbl>        <dbl>          <dbl>          <dbl>
     ##  1 Central Af… Africa            35.5         44.7          1071.           706.
@@ -497,8 +537,6 @@ weirdos <- describe_country %>%
     ## 10 Niger       Africa            37.4         56.9           762.           620.
     ## 11 Sierra Leo… Africa            30.3         42.6           880.           863.
     ## 12 Somalia     Africa            33.0         48.2          1136.           926.
-    ## 13 Swaziland   Africa            41.4         39.6          1148.          4513.
-    ## 14 Zimbabwe    Africa            48.5         43.5           407.           470.
 
 ``` r
 describe_country %>% 
@@ -521,7 +559,7 @@ describe_country %>%
   ) +
   facet_grid(continent~.) +
   labs(title = "Change in GDP per capita and Life Expectancy between 1952-2007", 
-       subtitle = "Question 5 - Plot 4 ",
+       subtitle = "Question 5 - Plot 6 ",
        x = "GDP per capita ($)",
        y = "Life Expectancy (years)"
        )
@@ -562,7 +600,7 @@ describe_country %>%
     mapping = aes(label = country)
   ) +
   labs(title = "Change in GDP per capita and Life Expectancy in Africa between 1952-2007", 
-       subtitle = "Question 5 - Plot 5 ",
+       subtitle = "Question 5 - Plot 7 ",
        x = "GDP per capita ($)",
        y = "Life Expectancy (years)"
        )
@@ -578,8 +616,8 @@ describe_country %>%
     demonstrate a decrease in either GDP per capita or life expectancy
     between 1952-2007.**
   - **In Africa, 11 countries demonstrate a decrease in either GDP per
-    capita or life expectancy between 1952-2007: Zimbabwe, Swaziland,
-    Comoros, Democractic Republic of Congo, Liberia, Madagascar, Niger,
-    Centreal African REpublic, Djibouti, Sierra Leone, and Somalia.**
-  - **Most countries are “richer” and have a longer life expectancy
+    capita between 1952-2007: Zimbabwe, Swaziland, Comoros, Democractic
+    Republic of Congo, Liberia, Madagascar, Niger, Centreal African
+    REpublic, Djibouti, Sierra Leone, and Somalia.**
+  - **Most countries are “richer” and all have a longer life expectancy
     between 1952-2007.**
