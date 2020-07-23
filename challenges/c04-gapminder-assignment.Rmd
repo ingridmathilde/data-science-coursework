@@ -1,7 +1,7 @@
 ---
 title: "Gapminder"
-author: "(Your name here)"
-date: 2020-
+author: "ingridmathilde"
+date: 2020-07-22
 output:
   github_document:
     toc: true
@@ -42,6 +42,7 @@ All the deliverables stated in the rubrics above are due on the day of the class
 ```{r setup}
 library(tidyverse)
 library(gapminder)
+library(ggrepel)
 
 ```
 
@@ -57,18 +58,27 @@ dataset?
 
 ```{r q0-task}
 ## TASK: Do your "first checks" here!
+head(gapminder)
+glimpse(gapminder)
+summary(gapminder)
 ```
 
 **Observations**:
 
-- Write the variable names here
+* **This dataset contains the following information:**
++ **Country**
++ **Continent**
++ **Year**
++ **Life Expentancy**
++ **Population**
++ **GDP per capita**
 
 __q1__ Determine the most and least recent years in the `gapminder` dataset.
 
 ```{r q1-task}
 ## TASK: Find the largest and smallest values of `year` in `gapminder`
-year_max <- NA_real_
-year_min <- NA_real_
+year_max <- max(select(gapminder,year))
+year_min <- min(select(gapminder, year))
 ```
 
 Use the following test to check your work.
@@ -88,15 +98,35 @@ You may encounter difficulties in visualizing these data; if so document your ch
 
 ```{r q2-task}
 ## TASK: Create a visual of gdpPercap vs continent
+gapminder %>% 
+  filter(year == year_min) %>% 
+  ggplot() +
+  geom_boxplot(aes(x = continent, y = gdpPercap)) +
+  labs(title = "Continent vs GDP per Capita (full scale)")
+
+gapminder %>% 
+  filter(year == year_min) %>% 
+  ggplot() +
+  geom_boxplot(aes(x = continent, y = gdpPercap), notch = TRUE) +
+  coord_cartesian(ylim = c(0,20000))+
+  labs(title = "Continent vs GDP per Capita (zoomed y-axis omits one outlier)")
+
 ```
 
-**Observations**:
+***Observations***:
 
-- Write your observations here
+* **Generally, Oceania has a greater GDP per Capita, followed by Europe, then the Americas, then Asia, then Africa.**
+* **Per continent there are outliers:**
++ **Africa: 3**
++ **Americas: 3**
++ **Asia : 2**
++ **Europe : 1**
++ **Oceania: 0**
+* **The GDP per Capita is the most spread for Europe, followed by Asia, then Americas, then Africa, then Oceania.**
 
-**Difficulties & Approaches**:
+***Difficulties & Approaches***:
 
-- Write your challenges and your approach to solving them
+* **Because of the greatest outlier for Asia, the scale of the graph made it difficult to understand the data - so I used coord_cartesian to zoom into the data.**
 
 __q3__ You should have found at least three outliers in q2. Identify those outliers (figure out which countries they are).
 
@@ -104,11 +134,58 @@ __q3__ You should have found at least three outliers in q2. Identify those outli
 
 ```{r q3-task}
 ## TASK: Identify the outliers from q2
+
+describe_continent_min <- gapminder %>%
+  filter(year == year_min) %>% 
+  group_by(continent) %>% 
+  mutate(min = min(gdpPercap),
+        max = max(gdpPercap),
+        median = median(gdpPercap),
+        IQRange = IQR(gdpPercap),
+        lower = quantile(gdpPercap, 0.25) - 1.5 * IQR(gdpPercap),
+        upper = quantile(gdpPercap, 0.75) + 1.5 * IQR(gdpPercap)
+            ) %>% 
+  ungroup() %>% 
+  filter(upper < gdpPercap)
+
+gapminder %>% 
+  filter(year == year_min) %>% 
+  ggplot(
+    aes(x = continent, 
+        y = gdpPercap)) +
+  geom_boxplot(outlier.color = "red") +
+  geom_label_repel(
+    data = describe_continent_min, 
+    mapping = aes(label = country)) +
+  labs(title = "Continent vs GDP per Capita (full scale)")
+
+gapminder %>% 
+  filter(year == year_min) %>% 
+  ggplot(
+    aes(x = continent, 
+        y = gdpPercap)) +
+  geom_boxplot(notch = TRUE, outlier.color = "red") +
+  geom_label_repel(
+    data = describe_continent_min, 
+    mapping = aes(label = country)) +
+  coord_cartesian(ylim = c(0,20000))+
+  labs(title = "Continent vs GDP per Capita (zoomed y-axis omits one outlier)")
+
 ```
 
-**Observations**:
+***Observations***:
 
-- Identify the outlier countries from q2
+* **My solution is quick and dirty but hey, it works.**
+* **The countries are:**
++ **Kuwait**
++ **Switzerland**
++ **Bahrain**
++ **United States**
++ **Canada**
++ **Venezuela**
++ **South Africa**
++ **Gabon**
++ **Angola**
 
 __q4__ Create a plot similar to yours from q2 studying both `year_min` and `year_max`. Find a way to highlight the outliers from q3 on your plot. Compare the patterns between `year_min` and `year_max`.
 
@@ -116,11 +193,51 @@ __q4__ Create a plot similar to yours from q2 studying both `year_min` and `year
 
 ```{r q4-task}
 ## TASK: Create a visual of gdpPercap vs continent
+describe_continent_max <- gapminder %>%
+  filter(year == year_max) %>% 
+  group_by(continent) %>% 
+  mutate(min = min(gdpPercap),
+        max = max(gdpPercap),
+        median = median(gdpPercap),
+        IQRange = IQR(gdpPercap),
+        lower = quantile(gdpPercap, 0.25) - 1.5 * IQR(gdpPercap),
+        upper = quantile(gdpPercap, 0.75) + 1.5 * IQR(gdpPercap)
+            ) %>% 
+  ungroup() %>% 
+  filter(upper < gdpPercap)
+
+gapminder %>% 
+  filter(year == year_min | year == year_max) %>% 
+  ggplot(aes(x = continent, y = gdpPercap)) +
+  geom_boxplot(outlier.color = "red") +
+  facet_grid(.~year) +
+  labs(title = "Continent vs GDP per Capita (full scale)")
+ 
+
+gapminder %>% 
+  filter(year == year_min | year == year_max) %>% 
+  ggplot(aes(x = continent, y = gdpPercap)) +
+  geom_boxplot(outlier.color = "red") +
+  geom_label_repel(
+    data = describe_continent_min, 
+    mapping = aes(label = country)) +
+  geom_label_repel(
+    data = describe_continent_max, 
+    mapping = aes(label = country)) +
+  facet_grid(.~year) +
+  labs(title = "Continent vs GDP per Capita (full scale)") 
+  
 ```
 
 **Observations**:
 
-- Write your observations here
+* **The GDP across the world has increased from 1952-2007.**
+* ** The variability of GDP has increased within each continent from 1952-2007.**
+* **The countries that continue to be outliers compared to their continent are:**
++ **Gabon**
++ **South Africa**
++ **United States**
++ **Canada**
 
 # Your Own EDA
 <!-- -------------------------------------------------- -->
@@ -131,15 +248,145 @@ __q5__ Create *at least* three new figures below. With each figure, try to pose 
 
 ```{r q5-task1}
 ## TASK: Your first graph
-```
 
+gapminder %>%
+  filter(year == year_max | year == year_min) %>% 
+  ggplot(
+    aes(
+      x = gdpPercap/mean(gdpPercap), 
+      y = lifeExp/mean(lifeExp)
+      )
+    ) +
+  geom_point(aes(color = as.factor(year))) +
+  labs(title = "Comparative GDP per capita vs Comparative Life Expectancy", 
+       subtitle = "Question 5 - Plot 1 "
+       )
+  
+```
+***Observations***
+* **In 1952 and in 2007, comparatively higher GDP is associated with comparatively higher life expectancy.**
+* **In 1952, the comparaitve disparity in life expectancy and GDP was smaller than those in 2007.**
+* **This is a trend in the world, but is this trend true for the 'worst off' countries in the world?**
 
 ```{r q5-task2}
 ## TASK: Your second graph
+lowest_gdp <- gapminder %>%
+  filter(year == year_min) %>% 
+  arrange(gdpPercap)
+
+lowest_life <- gapminder %>%
+  filter(year == year_min) %>% 
+  arrange(lifeExp)
+
+gapminder %>% 
+  filter(country == "Lesotho") %>% 
+  ggplot(aes(x = year, y = gdpPercap)) +
+  geom_line(color = "blue") +
+  geom_point(aes(alpha = lifeExp)) +
+  labs(
+    title = "Lesotho's (the poorest country in 1952)\n changes in GDP per capita and Life Expectancy",
+    subtitle = "Question 5 - Plot 2")
+
+gapminder %>% 
+  filter(country == "Afghanistan") %>% 
+  ggplot(aes(x = year, y = gdpPercap)) +
+  geom_line(color = "red") +
+  geom_point(aes(alpha = lifeExp)) +
+  labs(
+    title = "Afghanistan's (the country with the lowest life expectancy in 1952)\n changes in GDP per capita and Life Expectancy",
+    subtitle = "Question 5 - Plot 3")
+
 ```
+
+***Observations***
+
+* **The trend previously discuss (higher GDP per capita associated with higher life expectancy) would dictate that as GDP increases, the life expectancy increases.**
+* **For the 'worst-off' countries in the world in 1952, there is not a direct correlation between GPD per capita and life expectancy as it changed over time.**
+* **Obviously GDP is not the only factor at play - war, famine, health crises can all affect life expectancy. Both [Afghanistan](https://en.wikipedia.org/wiki/History_of_Afghanistan#Contemporary_era_(1973%E2%80%93present)) and [Lesotho](https://en.wikipedia.org/wiki/History_of_Lesotho#Kingdom_of_Lesotho) have experienced armed conflicts, famine, and widespread inaccessibility to healthcare throughout their histories.**
 
 
 ```{r q5-task3}
 ## TASK: Your third graph
+
+describe_country <- gapminder %>%
+  filter(year == year_min | year == year_max & !is.na(gdpPercap) & !is.na(lifeExp)) %>%
+  select(-pop) %>% 
+  pivot_wider(names_from = year, values_from = c(lifeExp, gdpPercap))
+
+weirdos <- describe_country %>%
+  filter(gdpPercap_1952 > gdpPercap_2007 | lifeExp_1952 > lifeExp_2007)
+  
+  weirdos
+
+describe_country %>% 
+  ggplot(
+    aes(
+      x = gdpPercap_1952, 
+      y = lifeExp_1952
+      )
+  ) +
+  geom_segment(
+    aes(
+      xend = gdpPercap_2007, 
+      yend = lifeExp_2007, 
+      color = continent
+  ), 
+    arrow = arrow(length = unit(0.1,"cm"))) +
+  geom_label_repel(
+    data = filter(weirdos, continent != "Africa"),
+    mapping = aes(label = country)
+  ) +
+  facet_grid(continent~.) +
+  labs(title = "Change in GDP per capita and Life Expectancy between 1952-2007", 
+       subtitle = "Question 5 - Plot 4 ",
+       x = "GDP per capita ($)",
+       y = "Life Expectancy (years)"
+       )
+
+describe_country %>%
+  filter(continent == "Africa") %>% 
+  ggplot(
+    aes(
+      x = gdpPercap_1952, 
+      y = lifeExp_1952
+      )
+  ) +
+  geom_segment(
+    aes(
+      xend = gdpPercap_2007, 
+      yend = lifeExp_2007, 
+      color = "Increases"
+      ), 
+    color = "red",
+    arrow = arrow(length = unit(0.1,"cm"))
+  ) +
+   geom_segment(
+     data = filter(weirdos, continent == "Africa"),
+     mapping = aes(
+      xend = gdpPercap_2007, 
+      yend = lifeExp_2007, 
+      color = "Decreases"
+      ),
+     color = "black",
+     arrow = arrow(length = unit(0.1,"cm"))
+  ) +
+  geom_label_repel(
+    data = filter(weirdos, continent == "Africa"),
+    mapping = aes(label = country)
+  ) +
+  labs(title = "Change in GDP per capita and Life Expectancy in Africa between 1952-2007", 
+       subtitle = "Question 5 - Plot 5 ",
+       x = "GDP per capita ($)",
+       y = "Life Expectancy (years)"
+       )
+
+
+
 ```
 
+***Observations***
+
+* **Europe and Asia demonstrate the greates change in GDP per capita and Life Expectancy.**
+* **In the Americas and Asia, only Kuwait, Haiti, and Nicaragua demonstrate a decrease in either GDP per capita or life expectancy between 1952-2007.**
+* **In Africa, 11 countries demonstrate a decrease in either GDP per capita or life expectancy between 1952-2007: Zimbabwe, Swaziland, Comoros, Democractic Republic of Congo, Liberia, Madagascar, Niger, Centreal African REpublic, Djibouti, Sierra Leone, and Somalia.**
+* **Most countries are "richer" and have a longer life expectancy between 1952-2007.**
