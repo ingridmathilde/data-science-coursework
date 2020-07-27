@@ -1,7 +1,7 @@
 ---
 title: "Antibiotics"
-author: "(Your name here)"
-date: 2020-
+author: "ingridmathilde"
+date: 2020-07-27
 output:
   github_document:
     toc: true
@@ -46,6 +46,7 @@ All the deliverables stated in the rubrics above are due on the day of the class
 ```{r setup}
 library(tidyverse)
 library(ggrepel)
+library(cowplot)
 
 ```
 
@@ -73,12 +74,44 @@ __q1__ Create a visualization of `df_antibiotics` that helps you to compare the 
 
 ```{r q1-task}
 ## TASK: Create your visualization
+df_antibiotics_longer <- df_antibiotics %>% 
+  pivot_longer(
+    cols = c(-bacteria, -gram),
+    names_to = "antibiotic",
+    values_to = "value"
+  )
+
+p1 <- df_antibiotics_longer %>% 
+  ggplot(
+    aes(
+      x = antibiotic, 
+      y = value
+      )
+  ) +
+  geom_hline(yintercept = 0.1, linetype = "dashed", color = "blue") +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(aes(color = gram)) +
+  facet_grid(.~gram) +
+  labs(
+    title = "Trends in minimum inhibitory concentration vs different antibiotics",
+    subtitle = "Question 1 - Plot 1",
+    y = "MIC (mug/ml) on log scale"
+  )  +
+  coord_trans(y = "log")
+
+p1
+
+
 ```
 
 **Observations**:
 
-- Record your observations here
-- Can you make any broad statements about antibiotic effectiveness?
+* **Gram negative strains are most sensitive to neomycin, then to streptomycin, then to penicillin.**
+* **Gram negative bacteria tend to have a greater range and value of MIC for penicillin - perhaps there are more resistant strains of gram negative bacteria in this data set.**
+* **Gram positive bacteria strains are most sensitive to penicillin, then to neomycin, then to streptomycin.**
+* **Most bacterial strains are most sensitive to neomycin.**
+* **Gram negative strains are best treated using neomycin (though it is likley to be effective against just over 50% of bacteria that fit into this category if using 0.1 mug/ml concetration). Gram positive strains are best treated using penicillin (effective against all but one strain in the data set if using 0.1 mug/ml concentration).**
+
 
 ## Purpose: Categorize Bacteria
 <!-- ------------------------- -->
@@ -89,11 +122,49 @@ __q2__ Create a visualization of `df_antibiotics` that helps you to categorize b
 
 ```{r q2-task}
 ## TASK: Create your visualization
+
+df_antibiotics %>% 
+  separate(
+    bacteria, 
+    into = c("genus", "species"), 
+    sep = " ", 
+    remove = FALSE
+  ) %>% 
+  mutate(
+    shape = case_when(
+      genus == "Diplococcus" ~ "spherical",
+      genus == "Staphylococcus" ~ "spherical",
+      genus == "Streptococcus" ~ "spherical",
+      TRUE ~ "rod"
+    )
+  ) %>% 
+  pivot_longer(
+    cols = c(penicillin, neomycin, streptomycin),
+    names_to = "antibiotic",
+    values_to = "value"
+  ) %>% 
+  ggplot(aes(y = genus, x = value, color = antibiotic)) +
+  geom_point() +
+  geom_vline(
+    xintercept = 0.1, 
+    linetype = "dashed", 
+    color = "blue"
+  ) +
+  coord_trans(x = "log") +
+  labs(
+    title = "Minimum inhibitory concentration for each genus vs different antibiotics",
+    subtitle = "Question 2 - Plot 1",
+    x = "MIC (mug/ml) on log scale"
+  )
+
 ```
 
-**Observations**:
+***Observations***:
 
-- Document your observations here!
+* **Penicillin is effective for treating humans (MIC < 0.1 mug/ml) against the represented strains of Streptococcus, Staphylococcus, Diplococcus, and Bacillus.**
+* **Neomycin is effective for treating humans (MIS < 0.1 mug/ml) against Staphylococcus, Salmonella, Escherichia, Bucella, and Bacillus.**
+* **Streptomycin is effective for treating humans (MIS < 0.1 mug/ml) against Staphylococcus, Proteus, and Bacillus.**
+* **None of the antibiotics are effective for treating Pseudomonas, Mycobacterium, Klebsiella, or Aerobacter.**
 
 # References
 <!-- -------------------------------------------------- -->
