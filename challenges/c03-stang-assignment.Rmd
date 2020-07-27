@@ -136,11 +136,30 @@ df_stang_long %>%
 
 ***Observations***:
 
+<<<<<<< HEAD
 * **There is no one true value for the material properties of Aluminum-it depends on many factors (like those listed above).**
 * **One aluminum alloy was tested - we see this when grouping by angle.**
 * **Angles 0, 45, and 90 were tested.**
 * **Thicknesses 0.022, 0.032, 0.064, and 0.081 were tested.**
 * **How does angle and thickness affect the results?**
+||||||| merged common ancestors
+- Is there "one true value" for the material properties of Aluminum?
+- How many aluminum alloys were tested? How do you know?
+- What angles were tested?
+- What thicknesses were tested?
+- (Write your own question here)
+- No; we see a variety of values for `E` and `mu`.
+- Just one alloy: al_24st
+- Angles: 0, 45, 90 (degrees)
+- Thicknesses: 0.022, 0.032, 0.064, 0.081 (in)
+- I'm curious if the properties `E, mu` vary with thickness
+=======
+- Is there "one true value" for the material properties of Aluminum?
+- How many aluminum alloys were tested? How do you know?
+- What angles were tested?
+- What thicknesses were tested?
+- (Write your own question here)
+>>>>>>> 0b3089720831f3dc9c9de76cbaf6637bce1c5ad6
 
 # Visualize
 <!-- ------------------------- -->
