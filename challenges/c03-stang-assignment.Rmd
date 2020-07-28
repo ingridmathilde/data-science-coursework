@@ -148,6 +148,7 @@ df_stang_long %>%
 - What angles were tested?
 - What thicknesses were tested?
 - (Write your own question here)
+<<<<<<< HEAD
 - No; we see a variety of values for `E` and `mu`.
 - Just one alloy: al_24st
 - Angles: 0, 45, 90 (degrees)
@@ -159,6 +160,14 @@ df_stang_long %>%
 - What angles were tested?
 - What thicknesses were tested?
 - (Write your own question here)
+>>>>>>> 0b3089720831f3dc9c9de76cbaf6637bce1c5ad6
+||||||| merged common ancestors
+- No; we see a variety of values for `E` and `mu`.
+- Just one alloy: al_24st
+- Angles: 0, 45, 90 (degrees)
+- Thicknesses: 0.022, 0.032, 0.064, 0.081 (in)
+- I'm curious if the properties `E, mu` vary with thickness
+=======
 >>>>>>> 0b3089720831f3dc9c9de76cbaf6637bce1c5ad6
 
 # Visualize
