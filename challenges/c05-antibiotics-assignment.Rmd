@@ -123,7 +123,7 @@ __q2__ Create a visualization of `df_antibiotics` that helps you to categorize b
 ```{r q2-task}
 ## TASK: Create your visualization
 
-df_antibiotics %>% 
+df_antibiotics2 <- df_antibiotics %>% 
   separate(
     bacteria, 
     into = c("genus", "species"), 
@@ -142,7 +142,11 @@ df_antibiotics %>%
     cols = c(penicillin, neomycin, streptomycin),
     names_to = "antibiotic",
     values_to = "value"
-  ) %>% 
+  )
+
+df_antibiotics2
+
+df_antibiotics2 %>% 
   ggplot(aes(y = genus, x = value, color = antibiotic)) +
   geom_point() +
   geom_vline(
@@ -150,6 +154,7 @@ df_antibiotics %>%
     linetype = "dashed", 
     color = "blue"
   ) +
+  facet_grid(.~gram) +
   coord_trans(x = "log") +
   labs(
     title = "Minimum inhibitory concentration for each genus vs different antibiotics",
@@ -165,6 +170,7 @@ df_antibiotics %>%
 * **Neomycin is effective for treating humans (MIS < 0.1 mug/ml) against Staphylococcus, Salmonella, Escherichia, Bucella, and Bacillus.**
 * **Streptomycin is effective for treating humans (MIS < 0.1 mug/ml) against Staphylococcus, Proteus, and Bacillus.**
 * **None of the antibiotics are effective for treating Pseudomonas, Mycobacterium, Klebsiella, or Aerobacter.**
+* **[Gram negative](https://en.wikipedia.org/wiki/Gram-negative_bacteria) bacterial strains in this dataset are more drug-resistant than Gram positive bacertial strains. Gram positive bacteria strains have a physical defensive layer against antibiotics that can be pierced by penicillin.  Meanwhile, the Gram negative bacertial strains have developed/possess other defenses against antibiotics ([efflux pumps](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3711980/), [mutation](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC89960/), and [lactamase production](https://en.wikipedia.org/wiki/Beta-lactamase)).**
 
 # References
 <!-- -------------------------------------------------- -->

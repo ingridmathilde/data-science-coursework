@@ -230,7 +230,7 @@ don’t—align with their *genus* classification.
 ``` r
 ## TASK: Create your visualization
 
-df_antibiotics %>% 
+df_antibiotics2 <- df_antibiotics %>% 
   separate(
     bacteria, 
     into = c("genus", "species"), 
@@ -249,7 +249,32 @@ df_antibiotics %>%
     cols = c(penicillin, neomycin, streptomycin),
     names_to = "antibiotic",
     values_to = "value"
-  ) %>% 
+  )
+```
+
+    ## Warning: Expected 2 pieces. Additional pieces discarded in 1 rows [10].
+
+``` r
+df_antibiotics2
+```
+
+    ## # A tibble: 48 x 7
+    ##    bacteria            genus      species   gram    shape    antibiotic    value
+    ##    <chr>               <chr>      <chr>     <chr>   <chr>    <chr>         <dbl>
+    ##  1 Aerobacter aerogen… Aerobacter aerogenes negati… rod      penicillin  870    
+    ##  2 Aerobacter aerogen… Aerobacter aerogenes negati… rod      neomycin      1.6  
+    ##  3 Aerobacter aerogen… Aerobacter aerogenes negati… rod      streptomyc…   1    
+    ##  4 Brucella abortus    Brucella   abortus   negati… rod      penicillin    1    
+    ##  5 Brucella abortus    Brucella   abortus   negati… rod      neomycin      0.02 
+    ##  6 Brucella abortus    Brucella   abortus   negati… rod      streptomyc…   2    
+    ##  7 Bacillus anthracis  Bacillus   anthracis positi… rod      penicillin    0.001
+    ##  8 Bacillus anthracis  Bacillus   anthracis positi… rod      neomycin      0.007
+    ##  9 Bacillus anthracis  Bacillus   anthracis positi… rod      streptomyc…   0.01 
+    ## 10 Diplococcus pneumo… Diplococc… pneumonia positi… spheric… penicillin    0.005
+    ## # … with 38 more rows
+
+``` r
+df_antibiotics2 %>% 
   ggplot(aes(y = genus, x = value, color = antibiotic)) +
   geom_point() +
   geom_vline(
@@ -257,6 +282,7 @@ df_antibiotics %>%
     linetype = "dashed", 
     color = "blue"
   ) +
+  facet_grid(.~gram) +
   coord_trans(x = "log") +
   labs(
     title = "Minimum inhibitory concentration for each genus vs different antibiotics",
@@ -264,8 +290,6 @@ df_antibiotics %>%
     x = "MIC (mug/ml) on log scale"
   )
 ```
-
-    ## Warning: Expected 2 pieces. Additional pieces discarded in 1 rows [10].
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q2-task-1.png)<!-- -->
 
@@ -281,6 +305,17 @@ df_antibiotics %>%
     against Staphylococcus, Proteus, and Bacillus.**
   - **None of the antibiotics are effective for treating Pseudomonas,
     Mycobacterium, Klebsiella, or Aerobacter.**
+  - **[Gram
+    negative](https://en.wikipedia.org/wiki/Gram-negative_bacteria)
+    bacterial strains in this dataset are more drug-resistant than Gram
+    positive bacertial strains. Gram positive bacteria strains have a
+    physical defensive layer against antibiotics that can be pierced by
+    penicillin. Meanwhile, the Gram negative bacertial strains have
+    developed/possess other defenses against antibiotics ([efflux
+    pumps](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3711980/),
+    [mutation](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC89960/), and
+    [lactamase
+    production](https://en.wikipedia.org/wiki/Beta-lactamase)).**
 
 # References
 
