@@ -36,6 +36,7 @@ Core
 - Wrangle
   - data from a messy source, e.g. a nasty excel file (e-data09-readxl)
   - loops into functional calls using purrr (e-data10-map)
+  - factors with forcats (e-data11-factors)
 - Liberate
   - data from images with WebPlotDigitizer
   - data from printed tables with Tabula
@@ -43,13 +44,15 @@ Core
 Bonus
 - Specialty
   - (lubridate)
-  - (forcats)
 
 ## (Visualization)
 
 Core
-- State the basic components of the *grammar of graphics*: geometry, aesthetics,
-  theme, layers
+- State and use the basic components of the *grammar of graphics*:
+  - geometry (many)
+  - aesthetics (e-vis00-basics)
+  - theme (e-vis07-themes)
+  - layers (e-vis04-scatterplot)
 - Create
   - bar charts (e-vis01-bar-charts)
   - histograms (e-vis02-histograms)
@@ -93,8 +96,8 @@ Core
   - a distribution (e-stat08-fit-dist)
   - a linear model
 - Question
+  - whether a given degree of certainty is sufficient to make a decision (e-stat10-hyp-intro)
   - whether a given numerical result relates to a qualitative conclusion
-  - whether a given degree of certainty is sufficient to make a decision
   - whether a given study has sufficient relevance to a given question
   - whether a model is flexible enough to fit a given dataset
 
@@ -115,7 +118,8 @@ Bonus
 ## (Reproducibility)
 
 Core
-- (Git)
+- use Git for basic version control (e-rep01-intro-git, e-rep03-track)
+- create a GitHub repository (e-rep02-create)
+- structure a project directory (e-rep04-directories)
 - (Command line)
 - (File hygiene)
-- (Directory structuring)
