@@ -74,16 +74,27 @@ for more information.
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──
+    ## ── Attaching packages ────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──
 
     ## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
     ## ✓ tibble  3.0.1     ✓ dplyr   1.0.0
     ## ✓ tidyr   1.1.0     ✓ stringr 1.4.0
     ## ✓ readr   1.3.1     ✓ forcats 0.5.0
 
-    ## ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ───────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
+
+``` r
+library(lubridate)
+```
+
+    ## 
+    ## Attaching package: 'lubridate'
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     date, intersect, setdiff, union
 
 *Background*:
 [COVID-19](https://en.wikipedia.org/wiki/Coronavirus_disease_2019) is
@@ -253,7 +264,7 @@ df_pop %>% glimpse
 df_covid %>% glimpse
 ```
 
-    ## Rows: 376,334
+    ## Rows: 385,985
     ## Columns: 6
     ## $ date   <date> 2020-01-21, 2020-01-22, 2020-01-23, 2020-01-24, 2020-01-24, 2…
     ## $ county <chr> "Snohomish", "Snohomish", "Snohomish", "Cook", "Snohomish", "O…
@@ -358,14 +369,34 @@ data.
 
 **q5** Use the `population` estimates in `df_data` to normalize `cases`
 and `deaths` to produce per 100,000 counts.\[3\] Store these values in
-the columns `cases_perk` and `deaths_perk`.
+the columns `cases_per100k` and `deaths_per100k`.
 
 ``` r
 ## TASK: Normalize cases and deaths
 df_normalized <-
   df_data %>% 
-  mutate(cases_perk = cases/(population/100000), deaths_perk = deaths/(population/100000))
+  mutate(
+    cases_per100k = cases/(population/100000), 
+    deaths_per100k = deaths/(population/100000)
+  )
+
+df_normalized
 ```
+
+    ## # A tibble: 385,985 x 9
+    ##    date       county state fips  cases deaths population cases_per100k
+    ##    <date>     <chr>  <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
+    ##  1 2020-01-21 Snoho… Wash… 53061     1      0     786620       0.127  
+    ##  2 2020-01-22 Snoho… Wash… 53061     1      0     786620       0.127  
+    ##  3 2020-01-23 Snoho… Wash… 53061     1      0     786620       0.127  
+    ##  4 2020-01-24 Cook   Illi… 17031     1      0    5223719       0.0191 
+    ##  5 2020-01-24 Snoho… Wash… 53061     1      0     786620       0.127  
+    ##  6 2020-01-25 Orange Cali… 06059     1      0    3164182       0.0316 
+    ##  7 2020-01-25 Cook   Illi… 17031     1      0    5223719       0.0191 
+    ##  8 2020-01-25 Snoho… Wash… 53061     1      0     786620       0.127  
+    ##  9 2020-01-26 Maric… Ariz… 04013     1      0    4253913       0.0235 
+    ## 10 2020-01-26 Los A… Cali… 06037     1      0   10098052       0.00990
+    ## # … with 385,975 more rows, and 1 more variable: deaths_per100k <dbl>
 
 You may use the following test to check your work.
 
@@ -378,7 +409,7 @@ assertthat::assert_that(
                  str_detect(county, "Snohomish"),
                  date == "2020-01-21"
                ) %>%
-              pull(cases_perk) - 0.127) < 1e-3
+              pull(cases_per100k) - 0.127) < 1e-3
             )
 ```
 
@@ -391,7 +422,7 @@ assertthat::assert_that(
                  str_detect(county, "Snohomish"),
                  date == "2020-01-21"
                ) %>%
-              pull(deaths_perk) - 0) < 1e-3
+              pull(deaths_per100k) - 0) < 1e-3
             )
 ```
 
@@ -409,54 +440,36 @@ print("Excellent!")
 
 Before turning you loose, let’s complete a couple guided EDA tasks.
 
-**q6** Compute the mean and standard deviation for `cases_perk` and
-`deaths_perk`.
+**q6** Compute the mean and standard deviation for `cases_per100k` and
+`deaths_per100k`.
 
 ``` r
-## TASK: Compute mean and sd for cases_perk and deaths_perk
-df_normalized
-```
+## TASK: Compute mean and sd for cases_per100k and deaths_per100k
 
-    ## # A tibble: 376,334 x 9
-    ##    date       county  state fips  cases deaths population cases_perk deaths_perk
-    ##    <date>     <chr>   <chr> <chr> <dbl>  <dbl>      <dbl>      <dbl>       <dbl>
-    ##  1 2020-01-21 Snohom… Wash… 53061     1      0     786620    0.127             0
-    ##  2 2020-01-22 Snohom… Wash… 53061     1      0     786620    0.127             0
-    ##  3 2020-01-23 Snohom… Wash… 53061     1      0     786620    0.127             0
-    ##  4 2020-01-24 Cook    Illi… 17031     1      0    5223719    0.0191            0
-    ##  5 2020-01-24 Snohom… Wash… 53061     1      0     786620    0.127             0
-    ##  6 2020-01-25 Orange  Cali… 06059     1      0    3164182    0.0316            0
-    ##  7 2020-01-25 Cook    Illi… 17031     1      0    5223719    0.0191            0
-    ##  8 2020-01-25 Snohom… Wash… 53061     1      0     786620    0.127             0
-    ##  9 2020-01-26 Marico… Ariz… 04013     1      0    4253913    0.0235            0
-    ## 10 2020-01-26 Los An… Cali… 06037     1      0   10098052    0.00990           0
-    ## # … with 376,324 more rows
-
-``` r
 df_q6 <- df_normalized %>% 
   summarise(
-    cases_perk_mean = mean(cases_perk, na.rm = TRUE),
-    cases_perk_sd = sd(cases_perk, na.rm = TRUE),
-    deaths_perk_mean = mean(deaths_perk, na.rm = TRUE),
-    deaths_perk_sd = sd(deaths_perk, na.rm = TRUE)
+    cases_per100k_mean = mean(cases_per100k, na.rm = TRUE),
+    cases_per100k_sd = sd(cases_per100k, na.rm = TRUE),
+    deaths_per100k_mean = mean(deaths_per100k, na.rm = TRUE),
+    deaths_per100k_sd = sd(deaths_per100k, na.rm = TRUE)
   )
 
 df_q6
 ```
 
     ## # A tibble: 1 x 4
-    ##   cases_perk_mean cases_perk_sd deaths_perk_mean deaths_perk_sd
-    ##             <dbl>         <dbl>            <dbl>          <dbl>
-    ## 1            346.          653.             11.4           26.4
+    ##   cases_per100k_mean cases_per100k_sd deaths_per100k_mean deaths_per100k_sd
+    ##                <dbl>            <dbl>               <dbl>             <dbl>
+    ## 1               361.             669.                11.7              26.7
 
-**q7** Find the top 10 counties in terms of `cases_perk`, and the top 10
-in terms of `deaths_perk`. Report the population of each county along
-with the per-100,000 counts. Compare the counts against the mean values
-you found in q6. Note any observations. Does New York City show up in
-the top? Why or why not?
+**q7** Find the top 10 counties in terms of `cases_per100k`, and the top
+10 in terms of `deaths_per100k`. Report the population of each county
+along with the per-100,000 counts. Compare the counts against the mean
+values you found in q6. Note any observations. Does New York City show
+up in the top? Why or why not?
 
 ``` r
-## TASK: Find the top 10 max cases_perk counties; report populations as well
+## TASK: Find the top 10 max cases_per100k counties; report populations as well
 
 df_q7_1 <- df_normalized %>%
   group_by(
@@ -465,13 +478,13 @@ df_q7_1 <- df_normalized %>%
     population
   ) %>% 
   summarise(
-    cases_perk_mean = mean(cases_perk, na.rm = TRUE),
-    cases_perk_sd = sd(cases_perk, na.rm = TRUE),
-    deaths_perk_mean = mean(deaths_perk, na.rm = TRUE),
-    deaths_perk_sd = sd(deaths_perk, na.rm = TRUE)
+    cases_per100k_mean = mean(cases_per100k, na.rm = TRUE),
+    cases_per100k_sd = sd(cases_per100k, na.rm = TRUE),
+    deaths_per100k_mean = mean(deaths_per100k, na.rm = TRUE),
+    deaths_per100k_sd = sd(deaths_per100k, na.rm = TRUE)
   ) %>%
   ungroup() %>% 
-  arrange(desc(cases_perk_mean))
+  arrange(desc(cases_per100k_mean))
 ```
 
     ## `summarise()` regrouping output by 'county', 'state' (override with `.groups` argument)
@@ -480,23 +493,23 @@ df_q7_1 <- df_normalized %>%
 df_q7_1
 ```
 
-    ## # A tibble: 3,239 x 7
-    ##    county state population cases_perk_mean cases_perk_sd deaths_perk_mean
-    ##    <chr>  <chr>      <dbl>           <dbl>         <dbl>            <dbl>
-    ##  1 Trous… Tenn…       9573          10915.         6689.            34.7 
-    ##  2 Dakota Nebr…      20317           6891.         2963.           109.  
-    ##  3 Lake   Tenn…       7526           6090.         3843.             0   
-    ##  4 Nobles Minn…      21839           5803.         2622.            17.2 
-    ##  5 Linco… Arka…      13695           5243.         3174.            45.6 
-    ##  6 Buena… Iowa       20260           4255.         3836.            22.8 
-    ##  7 Colfax Nebr…      10760           4155.         2578.            22.2 
-    ##  8 Ford   Kans…      34484           3409.         2418.            13.5 
-    ##  9 Bleds… Tenn…      14602           3311.         1705.             4.32
-    ## 10 Seward Kans…      22692           3298.         1584.             5.98
-    ## # … with 3,229 more rows, and 1 more variable: deaths_perk_sd <dbl>
+    ## # A tibble: 3,242 x 7
+    ##    county state population cases_per100k_m… cases_per100k_sd deaths_per100k_…
+    ##    <chr>  <chr>      <dbl>            <dbl>            <dbl>            <dbl>
+    ##  1 Trous… Tenn…       9573           11046.            6660.            35.3 
+    ##  2 Dakota Nebr…      20317            6957.            2949.           112.  
+    ##  3 Lake   Tenn…       7526            6187.            3833.             0   
+    ##  4 Nobles Minn…      21839            5861.            2610.            17.5 
+    ##  5 Linco… Arka…      13695            5313.            3174.            46.3 
+    ##  6 Buena… Iowa       20260            4373.            3854.            23.8 
+    ##  7 Colfax Nebr…      10760            4212.            2570.            22.5 
+    ##  8 Ford   Kans…      34484            3467.            2422.            13.8 
+    ##  9 Seward Kans…      22692            3346.            1590.             6.28
+    ## 10 Bleds… Tenn…      14602            3339.            1693.             4.38
+    ## # … with 3,232 more rows, and 1 more variable: deaths_per100k_sd <dbl>
 
 ``` r
-## TASK: Find the top 10 deaths_perk counties; report populations as well
+## TASK: Find the top 10 deaths_per100k counties; report populations as well
 df_q7_2 <- df_normalized %>%
   group_by(
     county,
@@ -504,13 +517,13 @@ df_q7_2 <- df_normalized %>%
     population
   ) %>% 
   summarise(
-    cases_perk_mean = mean(cases_perk, na.rm = TRUE),
-    cases_perk_sd = sd(cases_perk, na.rm = TRUE),
-    deaths_perk_mean = mean(deaths_perk, na.rm = TRUE),
-    deaths_perk_sd = sd(deaths_perk, na.rm = TRUE)
+    cases_per100k_mean = mean(cases_per100k, na.rm = TRUE),
+    cases_per100k_sd = sd(cases_per100k, na.rm = TRUE),
+    deaths_per100k_mean = mean(deaths_per100k, na.rm = TRUE),
+    deaths_per100k_sd = sd(deaths_per100k, na.rm = TRUE)
   ) %>%
   ungroup() %>% 
-  arrange(desc(deaths_perk_mean))
+  arrange(desc(deaths_per100k_mean))
 ```
 
     ## `summarise()` regrouping output by 'county', 'state' (override with `.groups` argument)
@@ -519,20 +532,20 @@ df_q7_2 <- df_normalized %>%
 df_q7_2
 ```
 
-    ## # A tibble: 3,239 x 7
-    ##    county state population cases_perk_mean cases_perk_sd deaths_perk_mean
-    ##    <chr>  <chr>      <dbl>           <dbl>         <dbl>            <dbl>
-    ##  1 Rando… Geor…       7087           2182.          942.             245.
-    ##  2 Terre… Geor…       8859           2031.          836.             231.
-    ##  3 Hanco… Geor…       8535           1800.          999.             217.
-    ##  4 Early  Geor…      10348           2017.          886.             213.
-    ##  5 Essex  New …     793555           1679.          861.             159.
-    ##  6 St. J… Loui…      43446           1689.          791.             146.
-    ##  7 Union  New …     553066           2082.         1124.             140.
-    ##  8 Nassau New …    1356564           2233.         1142.             135.
-    ##  9 Passa… New …     504041           2297.         1298.             133.
-    ## 10 Mitch… Geor…      22432           1541.          678.             130.
-    ## # … with 3,229 more rows, and 1 more variable: deaths_perk_sd <dbl>
+    ## # A tibble: 3,242 x 7
+    ##    county state population cases_per100k_m… cases_per100k_sd deaths_per100k_…
+    ##    <chr>  <chr>      <dbl>            <dbl>            <dbl>            <dbl>
+    ##  1 Rando… Geor…       7087            2209.             949.             247.
+    ##  2 Terre… Geor…       8859            2057.             845.             233.
+    ##  3 Hanco… Geor…       8535            1837.            1012.             222.
+    ##  4 Early  Geor…      10348            2044.             895.             215.
+    ##  5 Essex  New …     793555            1696.             860.             161.
+    ##  6 St. J… Loui…      43446            1717.             806.             147.
+    ##  7 Union  New …     553066            2101.            1120.             142.
+    ##  8 Nassau New …    1356564            2252.            1139.             137.
+    ##  9 Passa… New …     504041            2322.            1296.             135.
+    ## 10 Turner Geor…       7962            1372.             859.             132.
+    ## # … with 3,232 more rows, and 1 more variable: deaths_per100k_sd <dbl>
 
 **Observations**:
 
@@ -557,6 +570,373 @@ a couple tips & ideas below:
   - Fix the *geographic exceptions* noted below to study New York City.
   - Your own idea\!
 
+<!-- end list -->
+
+``` r
+## THIS CODE SNIPPET IS ALMOST IDENTICAL TO CODE SUPPLIED BY ZDR
+
+## TASK: Find the URL for the NYT covid-19 county-level data
+url_masks <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/mask-use/mask-use-by-county.csv"
+
+## NOTE: No need to change this; just execute
+## Set the filename of the data to download
+filename_masks <- "./data/nyt_masks.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_masks,
+        destfile = filename_masks
+      )
+
+## Loads the downloaded csv
+df_masks <- read_csv(filename_masks)
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   COUNTYFP = col_character(),
+    ##   NEVER = col_double(),
+    ##   RARELY = col_double(),
+    ##   SOMETIMES = col_double(),
+    ##   FREQUENTLY = col_double(),
+    ##   ALWAYS = col_double()
+    ## )
+
+``` r
+df_q8 <- df_normalized
+```
+
+Codes of interest: \* Multnomah county: 41051 \* Washington county :
+41067 \* Clackamas county: 41005 \* Escambia county: 12033 \* Santa Rosa
+county : 12113 \* Olmsted county: 27109 \* Ramsey county: 27123 \*
+Hennepin county: 27053
+
+``` r
+counties <- c(41051, 41067, 41005, 12033, 12113, 27109, 27123, 27053)
+states <- c("Oregon", "Minnesota", "Florida")
+
+my_counties <- df_q8 %>% 
+  filter(fips == counties) %>%
+  group_by(fips) %>% 
+  mutate(
+    death_rate = (deaths)/cases*100
+  )
+```
+
+    ## Warning in fips == counties: longer object length is not a multiple of shorter
+    ## object length
+
+``` r
+county_cases <- my_counties %>%
+  ggplot(
+    aes(date, cases_per100k, color = fct_reorder2(county, date, cases_per100k), linetype = state)
+  ) +
+  geom_line() +
+  # scale_y_log10(labels = scales::label_number_si()) +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "New Cases (per 100,000 persons)"
+  )
+
+county_deaths <- my_counties %>%
+  ggplot(
+    aes(date, deaths_per100k, color = fct_reorder2(county, date, cases_per100k), linetype = state)
+  ) +
+  geom_line() +
+  # scale_y_log10(labels = scales::label_number_si()) +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "New Deaths (per 100,000 persons)"
+  )
+
+county_death_rate <- my_counties %>%
+  ggplot(
+    aes(date, death_rate, color = fct_reorder2(county, date, cases_per100k), linetype = state)
+  ) +
+  geom_line() +
+  # scale_y_log10(labels = scales::label_number_si()) +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "Week-to-week death rate (%)"
+  ) +
+  coord_cartesian(ylim = c(0,15))
+
+county_cases
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-filter%20counties-1.png)<!-- -->
+
+``` r
+county_deaths
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-filter%20counties-2.png)<!-- -->
+
+``` r
+county_death_rate
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-filter%20counties-3.png)<!-- -->
+
+``` r
+my_counties_cumsum <- my_counties %>% 
+  arrange(fips, date) %>% 
+  group_by(fips) %>% 
+  mutate(
+    running_cases = cumsum(cases), 
+    running_deaths = cumsum(deaths), 
+    running_cases_per100k = cumsum(cases_per100k), 
+    running_deaths_per100k = cumsum(deaths_per100k), 
+    running_deathrate_per100k = running_deaths_per100k/running_cases_per100k*100
+  )
+
+my_counties_cumsum
+```
+
+    ## # A tibble: 154 x 15
+    ## # Groups:   fips [8]
+    ##    date       county state fips  cases deaths population cases_per100k
+    ##    <date>     <chr>  <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
+    ##  1 2020-03-20 Escam… Flor… 12033     1      0     311522         0.321
+    ##  2 2020-03-21 Escam… Flor… 12033     1      0     311522         0.321
+    ##  3 2020-03-26 Escam… Flor… 12033    20      0     311522         6.42 
+    ##  4 2020-04-02 Escam… Flor… 12033   101      0     311522        32.4  
+    ##  5 2020-04-06 Escam… Flor… 12033   141      1     311522        45.3  
+    ##  6 2020-04-10 Escam… Flor… 12033   204      3     311522        65.5  
+    ##  7 2020-04-23 Escam… Flor… 12033   420     10     311522       135.   
+    ##  8 2020-04-24 Escam… Flor… 12033   434     11     311522       139.   
+    ##  9 2020-04-25 Escam… Flor… 12033   442     11     311522       142.   
+    ## 10 2020-04-30 Escam… Flor… 12033   506     11     311522       162.   
+    ## # … with 144 more rows, and 7 more variables: deaths_per100k <dbl>,
+    ## #   death_rate <dbl>, running_cases <dbl>, running_deaths <dbl>,
+    ## #   running_cases_per100k <dbl>, running_deaths_per100k <dbl>,
+    ## #   running_deathrate_per100k <dbl>
+
+``` r
+county_rcases <- my_counties_cumsum %>%
+  ggplot(
+    aes(date, running_cases_per100k, color = fct_reorder2(county, date, cases_per100k), linetype = state)
+  ) +
+  geom_line() +
+  # scale_y_log10(labels = scales::label_number_si()) +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "Running Total of Cases (per 100,000 persons)"
+  )
+
+county_rdeaths <- my_counties_cumsum %>%
+  ggplot(
+    aes(date, running_deaths_per100k, color = fct_reorder2(county, date, cases_per100k), linetype = state)
+  ) +
+  geom_line() +
+  # scale_y_log10(labels = scales::label_number_si()) +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "Running Total of Deaths (per 100,000 persons)"
+  )
+
+
+county_running_deathrate_per100k <- my_counties_cumsum %>%
+  ggplot(
+    aes(
+      date, 
+      running_deathrate_per100k, 
+      color = fct_reorder2(county, date, cases_per100k), linetype = state)
+  ) +
+  geom_line() +
+  # scale_y_log10(labels = scales::label_number_si()) +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "Running Death Rate (%) (per 100,000 persons)"
+  ) +
+  coord_cartesian(ylim = c(0, 15))
+
+county_rcases
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-cumsum-1.png)<!-- -->
+
+``` r
+county_rdeaths
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-cumsum-2.png)<!-- -->
+
+``` r
+county_running_deathrate_per100k
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-cumsum-3.png)<!-- -->
+
+``` r
+###IN PROGRESS###
+states <- c("Oregon", "Minnesota", "Florida")
+
+df_states <- df_data %>% 
+  mutate(
+    cases_per100k = cases/(population/100000), 
+    deaths_per100k = deaths/(population/100000)
+  )
+
+df_Oregon <- df_normalized %>% 
+  filter(state == "Oregon") %>%
+  select(date, cases, cases_per100k, deaths, deaths_per100k) %>% 
+  group_by(date) %>%
+  mutate(
+    cases = sum(cases),
+    cases_per100k = sum(cases_per100k),
+    deaths = sum(deaths),
+    deaths_per100k = sum(deaths_per100k)
+  ) %>% 
+  distinct()
+
+df_Minnesota <- df_normalized %>% 
+  filter(state == "Minnesota") %>%
+  select(state, date, cases, cases_per100k, deaths, deaths_per100k) %>% 
+  group_by(date) %>%
+  mutate(
+    cases = sum(cases),
+    cases_per100k = sum(cases_per100k),
+    deaths = sum(deaths),
+    deaths_per100k = sum(deaths_per100k)
+  )
+
+df_Oregon
+```
+
+    ## # A tibble: 154 x 5
+    ## # Groups:   date [154]
+    ##    date       cases cases_per100k deaths deaths_per100k
+    ##    <date>     <dbl>         <dbl>  <dbl>          <dbl>
+    ##  1 2020-02-28     1         0.172      0              0
+    ##  2 2020-02-29     1         0.172      0              0
+    ##  3 2020-03-01     2         0.344      0              0
+    ##  4 2020-03-02     2         0.344      0              0
+    ##  5 2020-03-03     2         0.344      0              0
+    ##  6 2020-03-04     2         0.344      0              0
+    ##  7 2020-03-05     2         0.344      0              0
+    ##  8 2020-03-06     2         0.344      0              0
+    ##  9 2020-03-07     6         2.96       0              0
+    ## 10 2020-03-08    13         5.04       0              0
+    ## # … with 144 more rows
+
+``` r
+df_Minnesota <- df_normalized %>% 
+  filter(state == "Florida") %>%
+  select(state, date, cases, cases_per100k, deaths, deaths_per100k) %>% 
+  group_by(date) %>%
+  mutate(
+    cases = sum(cases),
+    cases_per100k = sum(cases_per100k),
+    deaths = sum(deaths),
+    deaths_per100k = sum(deaths_per100k)
+  )
+
+df_normalized %>% 
+  filter(state == "Oregon") %>% 
+  ggplot(aes(x = date)) +
+  geom_area(
+    data = df_Oregon, 
+    mapping = aes(y = cases_per100k)
+  ) +
+  geom_line(
+    mapping = aes(
+      y = cases_per100k, 
+      color = fct_reorder2(county, date, cases_per100k)
+    )
+  ) +
+  # scale_y_log10(labels = scales::label_number_si()) +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "Running Death Rate (%) (per 100,000 persons)"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-state%20to%20county-1.png)<!-- -->
+
+``` r
+my_counties_masks_result <- df_q8 %>% 
+  filter(
+    fips == counties 
+    &
+    between(date, as.Date("2020-06-30"), as.Date("2020-07-30"))
+  ) %>%
+  group_by(fips) %>%
+  mutate(max_date = max(ymd(date))) %>% 
+  filter(date == max_date) %>% 
+  left_join(
+    df_masks, 
+    by = c("fips" = "COUNTYFP")
+  ) %>% 
+  unite(
+    "location", 
+    c("county", "state"), 
+    sep = ", ", 
+    remove = FALSE
+  ) 
+```
+
+    ## Warning in fips == counties: longer object length is not a multiple of shorter
+    ## object length
+
+``` r
+my_counties_masks_result_pivot <- my_counties_masks_result %>% 
+  pivot_longer(
+    cols = c(NEVER, RARELY, SOMETIMES, FREQUENTLY, ALWAYS),
+    names_to = "response",
+    values_to = "prop"
+  )
+
+my_counties_masks_result_pivot
+```
+
+    ## # A tibble: 40 x 13
+    ## # Groups:   fips [8]
+    ##    date       location county state fips  cases deaths population cases_per100k
+    ##    <date>     <chr>    <chr>  <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
+    ##  1 2020-07-19 Escambi… Escam… Flor… 12033  5765     58     311522         1851.
+    ##  2 2020-07-19 Escambi… Escam… Flor… 12033  5765     58     311522         1851.
+    ##  3 2020-07-19 Escambi… Escam… Flor… 12033  5765     58     311522         1851.
+    ##  4 2020-07-19 Escambi… Escam… Flor… 12033  5765     58     311522         1851.
+    ##  5 2020-07-19 Escambi… Escam… Flor… 12033  5765     58     311522         1851.
+    ##  6 2020-07-25 Olmsted… Olmst… Minn… 27109  1497     21     153065          978.
+    ##  7 2020-07-25 Olmsted… Olmst… Minn… 27109  1497     21     153065          978.
+    ##  8 2020-07-25 Olmsted… Olmst… Minn… 27109  1497     21     153065          978.
+    ##  9 2020-07-25 Olmsted… Olmst… Minn… 27109  1497     21     153065          978.
+    ## 10 2020-07-25 Olmsted… Olmst… Minn… 27109  1497     21     153065          978.
+    ## # … with 30 more rows, and 4 more variables: deaths_per100k <dbl>,
+    ## #   max_date <date>, response <chr>, prop <dbl>
+
+``` r
+my_counties_masks_result_pivot %>%
+  ggplot(
+    aes(response, fill = fct_reorder2(state, county, cases_per100k))
+  ) +
+  geom_bar() +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "Cases (per 100,000 persons)"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-masks-1.png)<!-- -->
+
 ### Aside: Some visualization tricks
 
 <!-- ------------------------- -->
@@ -571,7 +951,7 @@ df_normalized %>%
   filter(state == "Massachusetts") %>%
 
   ggplot(
-    aes(date, cases_perk, color = fct_reorder2(county, date, cases_perk))
+    aes(date, cases_per100k, color = fct_reorder2(county, date, cases_per100k))
   ) +
   geom_line() +
   scale_y_log10(labels = scales::label_number_si()) +
@@ -583,7 +963,7 @@ df_normalized %>%
   )
 ```
 
-    ## Warning: Removed 134 row(s) containing missing values (geom_path).
+    ## Warning: Removed 137 row(s) containing missing values (geom_path).
 
 ![](c06-covid19-assignment_files/figure-gfm/ma-example-1.png)<!-- -->
 
