@@ -380,22 +380,23 @@ df_normalized <-
     deaths_per100k = deaths/(population/100000)
   )
 
-df_normalized
+df_normalized %>% 
+  arrange(fips, date)
 ```
 
     ## # A tibble: 385,985 x 9
     ##    date       county state fips  cases deaths population cases_per100k
     ##    <date>     <chr>  <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
-    ##  1 2020-01-21 Snoho… Wash… 53061     1      0     786620       0.127  
-    ##  2 2020-01-22 Snoho… Wash… 53061     1      0     786620       0.127  
-    ##  3 2020-01-23 Snoho… Wash… 53061     1      0     786620       0.127  
-    ##  4 2020-01-24 Cook   Illi… 17031     1      0    5223719       0.0191 
-    ##  5 2020-01-24 Snoho… Wash… 53061     1      0     786620       0.127  
-    ##  6 2020-01-25 Orange Cali… 06059     1      0    3164182       0.0316 
-    ##  7 2020-01-25 Cook   Illi… 17031     1      0    5223719       0.0191 
-    ##  8 2020-01-25 Snoho… Wash… 53061     1      0     786620       0.127  
-    ##  9 2020-01-26 Maric… Ariz… 04013     1      0    4253913       0.0235 
-    ## 10 2020-01-26 Los A… Cali… 06037     1      0   10098052       0.00990
+    ##  1 2020-03-24 Autau… Alab… 01001     1      0      55200          1.81
+    ##  2 2020-03-25 Autau… Alab… 01001     4      0      55200          7.25
+    ##  3 2020-03-26 Autau… Alab… 01001     6      0      55200         10.9 
+    ##  4 2020-03-27 Autau… Alab… 01001     6      0      55200         10.9 
+    ##  5 2020-03-28 Autau… Alab… 01001     6      0      55200         10.9 
+    ##  6 2020-03-29 Autau… Alab… 01001     6      0      55200         10.9 
+    ##  7 2020-03-30 Autau… Alab… 01001     7      0      55200         12.7 
+    ##  8 2020-03-31 Autau… Alab… 01001     7      0      55200         12.7 
+    ##  9 2020-04-01 Autau… Alab… 01001    10      0      55200         18.1 
+    ## 10 2020-04-02 Autau… Alab… 01001    10      0      55200         18.1 
     ## # … with 385,975 more rows, and 1 more variable: deaths_per100k <dbl>
 
 You may use the following test to check your work.
@@ -1013,72 +1014,6 @@ final_counties_deaths <- df_final_counties %>%
     y = "New Deaths (per 100,000 persons)"
   )
 
-final_counties_rcases <- df_final_counties %>%
-  ggplot(
-    aes(
-      date, 
-      running_cases_per100k, 
-      color = fct_reorder2(
-        county, 
-        date, 
-        cases_per100k), 
-     linetype = state)
-  ) +
-  geom_line() +
-  scale_y_log10(labels = scales::label_number_si()) +
-  scale_linetype_discrete(name = "State") +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
-  labs(
-    title = "Running Total of COVID19 Cases",
-    x = "Date",
-    y = "Running Total of Cases (per 100,000 persons) on log scale"
-  )
-
-final_counties_rdeaths <- df_final_counties %>%
-  ggplot(
-    aes(
-      date, 
-      running_deaths_per100k, 
-      color = fct_reorder2(
-        county, 
-        date, 
-        cases_per100k), 
-      linetype = state)
-  ) +
-  geom_line() +
-  scale_y_log10(labels = scales::label_number_si()) +
-  scale_linetype_discrete(name = "State") +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
-  labs(
-    title = "Running Total of COVID19-related Deaths",
-    x = "Date",
-    y = "Running Total of Deaths (per 100,000 persons) on log scale"
-  )
-
-
-final_counties_rdeathratio <- df_final_counties %>%
-  ggplot(
-    aes(
-      date, 
-      running_deathratio_per100k, 
-      color = fct_reorder2(
-        county, 
-        date, 
-        cases_per100k), 
-      linetype = state)
-  ) +
-  geom_line() +
-  scale_linetype_discrete(name = "State") +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
-  labs(
-    title = "Running COVID19 Death: Cases Ratio",
-    x = "Date",
-    y = "Running Death: Cases Ratio (per 100,000 persons)"
-  )
-
 final_counties_deathratio <- df_final_counties %>%
   ggplot(
     aes(
@@ -1112,30 +1047,10 @@ final_counties_deaths
 ![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-2.png)<!-- -->
 
 ``` r
-final_counties_rcases
-```
-
-![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-3.png)<!-- -->
-
-``` r
-final_counties_rdeaths
-```
-
-    ## Warning: Transformation introduced infinite values in continuous y-axis
-
-![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-4.png)<!-- -->
-
-``` r
-final_counties_rdeathratio
-```
-
-![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-5.png)<!-- -->
-
-``` r
 final_counties_deathratio
 ```
 
-![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-6.png)<!-- -->
+![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-3.png)<!-- -->
 
 ### Aside: Some visualization tricks
 
