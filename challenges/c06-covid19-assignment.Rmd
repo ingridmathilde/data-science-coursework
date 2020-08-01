@@ -629,9 +629,9 @@ final_counties_cases <- df_final_counties %>%
   scale_color_discrete(name = "County") +
   theme_minimal() +
   labs(
-    title = "Daily COVID19 Cases",
+    title = "Cumulative COVID19 Cases",
     x = "Date",
-    y = "New Cases (per 100,000 persons)"
+    y = "Cases (per 100,000 persons)"
   )
 
 final_counties_deaths <- df_final_counties %>% 
@@ -651,9 +651,9 @@ final_counties_deaths <- df_final_counties %>%
   scale_color_discrete(name = "County") +
   theme_minimal() +
   labs(
-    title = "Daily COVID19 Deaths",
+    title = "Cumulative COVID19 Deaths",
     x = "Date",
-    y = "New Deaths (per 100,000 persons)"
+    y = "Deaths (per 100,000 persons)"
   )
 
 final_counties_deathratio <- df_final_counties %>%
@@ -672,9 +672,9 @@ final_counties_deathratio <- df_final_counties %>%
   scale_color_discrete(name = "County") +
   theme_minimal() +
   labs(
-    title = "Daily COVID19 Cases: Deaths Ratio",
+    title = "Cumulative COVID19 Cases: Deaths Ratio",
     x = "Date",
-    y = "Daily Death: Cases Ratio (per 100,000 persons)"
+    y = "Death: Cases Ratio (per 100,000 persons)"
   )
 
 final_counties_cases
