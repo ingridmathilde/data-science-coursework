@@ -96,6 +96,10 @@ library(lubridate)
     ## 
     ##     date, intersect, setdiff, union
 
+``` r
+library(ggrepel)
+```
+
 *Background*:
 [COVID-19](https://en.wikipedia.org/wiki/Coronavirus_disease_2019) is
 the disease caused by the virus SARS-CoV-2. In 2020 it became a global
@@ -325,8 +329,6 @@ print("Very good!")
 
     ## [1] "Very good!"
 
-Once
-
 **q4** Join `df_covid` with `df_q3` by the `fips` column. Use the proper
 type of join to preserve all rows in `df_covid`.
 
@@ -449,19 +451,14 @@ Before turning you loose, let’s complete a couple guided EDA tasks.
 
 df_q6 <- df_normalized %>% 
   summarise(
+    population_mean = mean(population, na.rm = TRUE),
+    popoulation_median = median(population, na.rm = TRUE),
     cases_per100k_mean = mean(cases_per100k, na.rm = TRUE),
     cases_per100k_sd = sd(cases_per100k, na.rm = TRUE),
     deaths_per100k_mean = mean(deaths_per100k, na.rm = TRUE),
     deaths_per100k_sd = sd(deaths_per100k, na.rm = TRUE)
   )
-
-df_q6
 ```
-
-    ## # A tibble: 1 x 4
-    ##   cases_per100k_mean cases_per100k_sd deaths_per100k_mean deaths_per100k_sd
-    ##                <dbl>            <dbl>               <dbl>             <dbl>
-    ## 1               366.             675.                11.8              26.9
 
 **q7** Find the top 10 counties in terms of `cases_per100k`, and the top
 10 in terms of `deaths_per100k`. Report the population of each county
@@ -474,6 +471,7 @@ up in the top? Why or why not?
 
 df_q7_1 <- df_normalized %>%
   group_by(
+    fips,
     county,
     state,
     population
@@ -485,34 +483,19 @@ df_q7_1 <- df_normalized %>%
     deaths_per100k_sd = sd(deaths_per100k, na.rm = TRUE)
   ) %>%
   ungroup() %>% 
-  arrange(desc(cases_per100k_mean))
+  arrange(desc(cases_per100k_mean)) %>%
+  unite("location", "county", "state", sep = ", ", remove = FALSE) %>% 
+  head(10) %>% 
+  arrange(state, desc(cases_per100k_mean))
 ```
 
-    ## `summarise()` regrouping output by 'county', 'state' (override with `.groups` argument)
-
-``` r
-df_q7_1
-```
-
-    ## # A tibble: 3,242 x 7
-    ##    county state population cases_per100k_m… cases_per100k_sd deaths_per100k_…
-    ##    <chr>  <chr>      <dbl>            <dbl>            <dbl>            <dbl>
-    ##  1 Trous… Tenn…       9573           11088.            6650.            35.6 
-    ##  2 Dakota Nebr…      20317            6979.            2944.           113.  
-    ##  3 Lake   Tenn…       7526            6219.            3831.             0   
-    ##  4 Nobles Minn…      21839            5879.            2606.            17.5 
-    ##  5 Linco… Arka…      13695            5336.            3174.            46.6 
-    ##  6 Buena… Iowa       20260            4411.            3859.            24.1 
-    ##  7 Colfax Nebr…      10760            4230.            2568.            22.7 
-    ##  8 Ford   Kans…      34484            3487.            2423.            13.9 
-    ##  9 Seward Kans…      22692            3362.            1593.             6.38
-    ## 10 Brist… Alas…        890            3349.            2946.             0   
-    ## # … with 3,232 more rows, and 1 more variable: deaths_per100k_sd <dbl>
+    ## `summarise()` regrouping output by 'fips', 'county', 'state' (override with `.groups` argument)
 
 ``` r
 ## TASK: Find the top 10 deaths_per100k counties; report populations as well
 df_q7_2 <- df_normalized %>%
   group_by(
+    fips,
     county,
     state,
     population
@@ -524,33 +507,176 @@ df_q7_2 <- df_normalized %>%
     deaths_per100k_sd = sd(deaths_per100k, na.rm = TRUE)
   ) %>%
   ungroup() %>% 
-  arrange(desc(deaths_per100k_mean))
+  arrange(desc(deaths_per100k_mean)) %>%
+  unite("location", "county", "state", sep = ", ", remove = FALSE) %>% 
+  head(10) %>% 
+  arrange(state, desc(cases_per100k_mean))
 ```
 
-    ## `summarise()` regrouping output by 'county', 'state' (override with `.groups` argument)
+    ## `summarise()` regrouping output by 'fips', 'county', 'state' (override with `.groups` argument)
 
 ``` r
-df_q7_2
+top_mean_cases <- ggplot(
+  data = df_q7_1,
+  mapping = aes(
+    x = population,
+    y = cases_per100k_mean,
+    color = state
+  )
+) +
+  geom_vline(xintercept = df_q6$population_mean) +
+  geom_hline(yintercept = df_q6$cases_per100k_mean, linetype = "dashed") +
+  geom_point() +
+  geom_label_repel(
+    aes(
+      label = county
+  )
+  ) +
+  annotate("text", x = 400, y = 1200, label = "Average County\n Cases Per 100k person") +
+  annotate("text", x = 270000, y = 10000, label = "Average\n County\n Population") +
+  scale_x_log10(labels = scales::label_number_si(), limits = c(1e2, 1e7)) +
+  scale_y_continuous(limits = c(0, 12000)) +
+  theme_minimal() +
+  labs(
+    title = "Mean COVID-19 cases per 100,000 persons vs Population",
+    subtitle = "Top 10 counties by Cases per 100,000 person",
+    x = "Population",
+    y = "Cases per 100,000 persons"
+  )
+
+top_mean_deaths <- ggplot(
+  data = df_q7_2,
+  mapping = aes(
+    x = population,
+    y = deaths_per100k_mean,
+    color = state
+  )
+) +
+  geom_vline(xintercept = df_q6$population_mean) +
+  geom_hline(yintercept = df_q6$deaths_per100k_mean, linetype = "dashed") +
+  geom_point() +
+  geom_label_repel(
+    aes(
+      label = county
+  )
+  ) +
+  annotate("text", x = 400, y = 30, label = "Average County\n Cases Per 100k person") +
+  annotate("text", x = 270000, y = 240, label = "Average\n County\n Population") +
+  scale_x_log10(labels = scales::label_number_si(), limits = c(1e2, 1e7)) +
+  scale_y_continuous(limits = c(0, 250)) +
+  theme_minimal() + 
+  scale_color_brewer(palette="Set1") +
+  labs(
+    title = "Mean COVID-19 deaths per 100,000 persons vs Population",
+    subtitle = "Top 10 counties by Deaths per 100,000 person",
+    x = "Population",
+    y = "Deaths per 100,000 persons"
+  )
 ```
 
-    ## # A tibble: 3,242 x 7
-    ##    county state population cases_per100k_m… cases_per100k_sd deaths_per100k_…
-    ##    <chr>  <chr>      <dbl>            <dbl>            <dbl>            <dbl>
-    ##  1 Rando… Geor…       7087            2220.             953.             248.
-    ##  2 Terre… Geor…       8859            2066.             848.             234.
-    ##  3 Hanco… Geor…       8535            1849.            1016.             224.
-    ##  4 Early  Geor…      10348            2054.             898.             216.
-    ##  5 Essex  New …     793555            1701.             859.             162.
-    ##  6 St. J… Loui…      43446            1727.             811.             148.
-    ##  7 Union  New …     553066            2108.            1118.             143.
-    ##  8 Nassau New …    1356564            2258.            1137.             137.
-    ##  9 Passa… New …     504041            2330.            1295.             136.
-    ## 10 Turner Geor…       7962            1382.             865.             132.
-    ## # … with 3,232 more rows, and 1 more variable: deaths_per100k_sd <dbl>
+``` r
+top_mean_cases
+```
 
-**Observations**:
+![](c06-covid19-assignment_files/figure-gfm/top_means_cases-1.png)<!-- -->
 
-  - Note your observations here\!
+***Observations***:
+
+  - **The top 10 counties in terms of case count per 100,000 persons is
+    well below the average county population of the USA.**
+  - **Trousdale is well above the rest in terms of cases and is of the 5
+    smaller population on the plot - Trousdale is a small community and
+    within it there is a prison where there was a huge COVID-19
+    [outbreak](https://wdef.com/2020/05/12/trousdale-bledsoe-counties-highest-covid-19-rates-country/).
+    As of
+    [July 20, 2020](https://www.newschannel5.com/news/tennessee-counties-continue-to-top-virus-cases-per-capita),
+    there where 1,500 cases in a county population of just over 9,500 -
+    at least 1,200 of these cases occurred in the prison.**
+  - **Similarly, [Lincoln county
+    (AK)](https://www.thv11.com/article/news/health/coronavirus/prison-nursing-home-outbreak-numbers-being-pinned-on-pine-bluff/91-4d20a72d-6d33-4835-9275-2c25ffd5a66d)
+    and [Lake county
+    (TN)](https://www.kfvs12.com/2020/05/14/covid-cases-lake-county-tenn-linked-northwest-correctional-complex/),
+    had outbreaks at prisons within the counties.**
+  - **Bristol Bay Borough is a fascinating example of the effect of
+    population on our model as well - it has the smallest population of
+    those in the top ten by a factor of at least 10. As of
+    [July 18, 2020](https://www.ktoo.org/2020/07/18/bristol-bay-borough-the-not-so-hot-covid-19-hotspot/),
+    there were 65 cases in a population of 850 - so showing the data in
+    per 100,000 persons shifts our perspective notably. To further
+    complicate this county’s story, it houses a bay and people are
+    entering and exiting the county frequently.**
+  - **Nobles, Minnesota houses a food packing plants to which just a
+    majority of cases can be traced: sources
+    [here](https://minnesota.cbslocal.com/2020/05/01/coronavirus-in-minnesota-nobles-county-reaches-866-known-cases-of-covid-19-most-traced-to-jbs-pork-plant/)
+    and
+    [here](https://www.carrollspaper.com/news/coronavirus/big-virus-outbreaks-would-trigger-online-learning/article_1d71b15a-d35a-11ea-a1ef-838c717569d4.html).**
+  - **[Dakota county
+    (NE)](https://omaha.com/news/state_and_regional/dakota-county-now-leads-nebraska-in-coronavirus-cases/article_c05e83e9-b83d-5ed2-a4be-d8615837043e.html),
+    [Colfax
+    (NE)](https://www.dailymail.co.uk/news/article-8315597/Majority-hotspot-COVID-19-counties-linked-meat-plant-outbreaks.html),
+    [Ford
+    (KS)](https://www.thekansan.com/news/20200419/kansas-beefs-up-testing-at-infection-clusters-linked-to-meat-processing-plants),
+    and [Seward
+    (KS)](https://www.thekansan.com/news/20200419/kansas-beefs-up-testing-at-infection-clusters-linked-to-meat-processing-plants)
+    outbreaks can be traced to food packing facilities.**
+  - **OVERALL: many hotspots can be attributed to both small populations
+    (screws the calculation) and institutions with close quarters
+    (prisons and food packing plants) - tragically, those living or
+    working in these situations are already vulnerable populations
+    pre-pandemic: food for thought
+    [here](https://www.washingtonpost.com/outlook/2019/02/10/prisoners-are-among-most-vulnerable-people-us/)
+    and
+    [here](https://www.hrw.org/report/2019/09/04/when-were-dead-and-buried-our-bones-will-keep-hurting/workers-rights-under-threat).**
+
+<!-- end list -->
+
+``` r
+top_mean_deaths
+```
+
+![](c06-covid19-assignment_files/figure-gfm/top_means_deaths-1.png)<!-- -->
+
+***Observations***:
+
+  - **Of the top 10 counties in terms of death count per 100,000
+    persons, 6 are well below the average county population of the USA,
+    and 4 are above.**
+  - **Interestingly, there is no overlap between top 10 cases and top 10
+    deaths.**
+  - **For deaths in Southwest Georgia (all counties except Turner), many
+    of the cases and thus deaths can be
+    [traced](https://www.gpb.org/news/2020/04/02/how-albany-emerged-global-covid-19-hotspot)
+    to several huge funerals in late February, hypothesized to be
+    exacerbated by lax social distancing measures. Combine this will
+    small county populations and the deaths per 100,000 persons in these
+    counties are the highest in the nation.**
+  - **Turner county (GA)
+    [cites](https://www.valdostadailytimes.com/news/breaking-first-covid-19-death-in-turner-county/article_aac87d8c-7db4-11ea-87f3-43812841f4f1.html)
+    many of the deaths occurred at a nursing home and that its small
+    population in increasing the number of deaths per 10,000 persons.**
+  - **St John the Baptist parish (LA) is quite small and is included in
+    “Cancer Alley”, a stretch of land housing a refinery and where
+    cancer and respiratory difficulty rates are [significantly
+    higher](https://www.humanrightsnetwork.org/waiting-to-die) than
+    national or evern state levels. Activists are arguing that long-time
+    exposure to pollution and drastically [increasing people’s risks to
+    dying to
+    COVID-19](https://www.cnn.com/2020/04/15/us/louisiana-st-john-the-baptist-coronavirus/index.html)
+    (which affects the respiratory tract).**
+  - **The county data for New Jersey and Nassau reflect the initial East
+    Coast/NYC outbreak of the virus where the population is densely
+    populated and it was first hit by the pandemic (see May 2020 summary
+    [here](https://philadelphia.cbslocal.com/2020/05/28/more-than-41-of-coronavirus-deaths-in-us-have-occurred-in-new-jersey-new-york/)).
+    Note that NYC is not included in the data because it is considered a
+    geographic exception (all NYC is listed as NYC with fips codes and
+    because of how I set up my data frames, NYC data won’t show up.**
+  - **OVERALL: The number of deaths is really overwhelming to consider -
+    with these numbers, we should carefully consider the implications of
+    normalizing our data. Normalized deaths per 10,000 persons
+    demonstrates the density of death in a community that is then
+    normalized across a common number - each death is devastating and
+    it’s easy to think well this or that but it’s still a dead
+    person.**
 
 ## Self-directed EDA
 
@@ -571,57 +697,28 @@ a couple tips & ideas below:
   - Fix the *geographic exceptions* noted below to study New York City.
   - Your own idea\!
 
+*Codes of personal interest:*
+
+I first selected some counties of personal interest (where my extended
+family lives) to examine trends or just differences.
+
+  - Multnomah county: 41051
+  - Washington county : 41067
+  - Clackamas county: 41005
+  - Escambia county: 12033
+  - Santa Rosa county : 12113
+  - Olmsted county: 27109
+  - Hennepin county: 27053
+  - Carver county : 27019
+
 <!-- end list -->
-
-``` r
-## THIS CODE SNIPPET IS ALMOST IDENTICAL TO CODE SUPPLIED BY ZDR
-
-## TASK: Find the URL for the NYT covid-19 county-level data
-url_masks <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/mask-use/mask-use-by-county.csv"
-
-## NOTE: No need to change this; just execute
-## Set the filename of the data to download
-filename_masks <- "./data/nyt_masks.csv"
-
-## Download the data locally
-curl::curl_download(
-        url_masks,
-        destfile = filename_masks
-      )
-
-## Loads the downloaded csv
-df_masks <- read_csv(filename_masks)
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   COUNTYFP = col_character(),
-    ##   NEVER = col_double(),
-    ##   RARELY = col_double(),
-    ##   SOMETIMES = col_double(),
-    ##   FREQUENTLY = col_double(),
-    ##   ALWAYS = col_double()
-    ## )
 
 ``` r
 df_q8 <- df_normalized
 ```
 
-Codes of interest: \* Multnomah county: 41051 \* Washington county :
-41067 \* Clackamas county: 41005 \* Escambia county: 12033 \* Santa Rosa
-county : 12113 \* Olmsted county: 27109
-
-  - Hennepin county: 27053
-  - Carver county : 27019
-  - Wake county: 37183
-  - Durham county: 37063
-  - Orleans county: 22071
-  - St. Tammany Parish county: 22103
-
-<!-- end list -->
-
 ``` r
-counties <- c(41051, 41067, 41005, 12033, 12113, 27109, 27123, 27053)
+counties <- c(41051, 41067, 41005, 12033, 12113, 27109, 27053, 27019)
 states <- c("Oregon", "Minnesota", "Florida")
 
 my_counties <- df_q8 %>% 
@@ -641,12 +738,13 @@ county_cases <- my_counties %>%
     aes(date, cases_per100k, color = fct_reorder2(county, date, cases_per100k), linetype = state)
   ) +
   geom_line() +
-  # scale_y_log10(labels = scales::label_number_si()) +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
+  scale_color_discrete(name = "County") + 
+  theme_minimal() + 
   labs(
-    x = "Date",
-    y = "New Cases (per 100,000 persons)"
+    title = "COVID-19 deaths per 100,000 persons vs Population",
+    subtitle = "Top 10 counties by Deaths per 100,000 person",
+    x = "Population",
+    y = "Deaths per 100,000 persons"
   )
 
 county_deaths <- my_counties %>%
@@ -675,119 +773,25 @@ county_death_rate <- my_counties %>%
     y = "Week-to-week death rate (%)"
   ) +
   coord_cartesian(ylim = c(0,15))
+```
 
+``` r
 county_cases
 ```
 
-![](c06-covid19-assignment_files/figure-gfm/q8-filter%20counties-1.png)<!-- -->
+![](c06-covid19-assignment_files/figure-gfm/my%20counties%20cases-1.png)<!-- -->
 
 ``` r
 county_deaths
 ```
 
-![](c06-covid19-assignment_files/figure-gfm/q8-filter%20counties-2.png)<!-- -->
+![](c06-covid19-assignment_files/figure-gfm/my%20counties%20deaths-1.png)<!-- -->
 
 ``` r
 county_death_rate
 ```
 
-![](c06-covid19-assignment_files/figure-gfm/q8-filter%20counties-3.png)<!-- -->
-
-``` r
-my_counties_cumsum <- my_counties %>% 
-  arrange(fips, date) %>% 
-  group_by(fips) %>% 
-  mutate(
-    running_cases = cumsum(cases), 
-    running_deaths = cumsum(deaths), 
-    running_cases_per100k = cumsum(cases_per100k), 
-    running_deaths_per100k = cumsum(deaths_per100k), 
-    running_deathrate_per100k = running_deaths_per100k/running_cases_per100k*100
-  )
-
-my_counties_cumsum
-```
-
-    ## # A tibble: 154 x 15
-    ## # Groups:   fips [8]
-    ##    date       county state fips  cases deaths population cases_per100k
-    ##    <date>     <chr>  <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
-    ##  1 2020-03-20 Escam… Flor… 12033     1      0     311522         0.321
-    ##  2 2020-03-21 Escam… Flor… 12033     1      0     311522         0.321
-    ##  3 2020-03-26 Escam… Flor… 12033    20      0     311522         6.42 
-    ##  4 2020-04-02 Escam… Flor… 12033   101      0     311522        32.4  
-    ##  5 2020-04-06 Escam… Flor… 12033   141      1     311522        45.3  
-    ##  6 2020-04-10 Escam… Flor… 12033   204      3     311522        65.5  
-    ##  7 2020-04-23 Escam… Flor… 12033   420     10     311522       135.   
-    ##  8 2020-04-24 Escam… Flor… 12033   434     11     311522       139.   
-    ##  9 2020-04-25 Escam… Flor… 12033   442     11     311522       142.   
-    ## 10 2020-04-30 Escam… Flor… 12033   506     11     311522       162.   
-    ## # … with 144 more rows, and 7 more variables: deaths_per100k <dbl>,
-    ## #   death_rate <dbl>, running_cases <dbl>, running_deaths <dbl>,
-    ## #   running_cases_per100k <dbl>, running_deaths_per100k <dbl>,
-    ## #   running_deathrate_per100k <dbl>
-
-``` r
-county_rcases <- my_counties_cumsum %>%
-  ggplot(
-    aes(date, running_cases_per100k, color = fct_reorder2(county, date, cases_per100k), linetype = state)
-  ) +
-  geom_line() +
-  # scale_y_log10(labels = scales::label_number_si()) +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Running Total of Cases (per 100,000 persons)"
-  )
-
-county_rdeaths <- my_counties_cumsum %>%
-  ggplot(
-    aes(date, running_deaths_per100k, color = fct_reorder2(county, date, cases_per100k), linetype = state)
-  ) +
-  geom_line() +
-  # scale_y_log10(labels = scales::label_number_si()) +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Running Total of Deaths (per 100,000 persons)"
-  )
-
-
-county_running_deathrate_per100k <- my_counties_cumsum %>%
-  ggplot(
-    aes(
-      date, 
-      running_deathrate_per100k, 
-      color = fct_reorder2(county, date, cases_per100k), linetype = state)
-  ) +
-  geom_line() +
-  # scale_y_log10(labels = scales::label_number_si()) +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Running Death Rate (%) (per 100,000 persons)"
-  ) +
-  coord_cartesian(ylim = c(0, 15))
-
-county_rcases
-```
-
-![](c06-covid19-assignment_files/figure-gfm/q8-cumsum-1.png)<!-- -->
-
-``` r
-county_rdeaths
-```
-
-![](c06-covid19-assignment_files/figure-gfm/q8-cumsum-2.png)<!-- -->
-
-``` r
-county_running_deathrate_per100k
-```
-
-![](c06-covid19-assignment_files/figure-gfm/q8-cumsum-3.png)<!-- -->
+![](c06-covid19-assignment_files/figure-gfm/my%20counties%20death%20rate-1.png)<!-- -->
 
 ``` r
 ###IN PROGRESS###
@@ -878,6 +882,36 @@ df_normalized %>%
 ![](c06-covid19-assignment_files/figure-gfm/q8-state%20to%20county-1.png)<!-- -->
 
 ``` r
+## THIS CODE SNIPPET IS ALMOST IDENTICAL TO CODE SUPPLIED BY ZDR
+
+## TASK: Find the URL for the NYT covid-19 county-level data
+url_masks <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/mask-use/mask-use-by-county.csv"
+
+## NOTE: No need to change this; just execute
+## Set the filename of the data to download
+filename_masks <- "./data/nyt_masks.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_masks,
+        destfile = filename_masks
+      )
+
+## Loads the downloaded csv
+df_masks <- read_csv(filename_masks)
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   COUNTYFP = col_character(),
+    ##   NEVER = col_double(),
+    ##   RARELY = col_double(),
+    ##   SOMETIMES = col_double(),
+    ##   FREQUENTLY = col_double(),
+    ##   ALWAYS = col_double()
+    ## )
+
+``` r
 my_counties_masks_result <- df_q8 %>% 
   filter(
     fips == counties 
@@ -946,8 +980,17 @@ my_counties_masks_result_pivot %>%
 
 ![](c06-covid19-assignment_files/figure-gfm/q8-masks-1.png)<!-- -->
 
+**Group Project Section**
+
+Based on discussions with my team, we subselected some counties that
+told a compelling and personal story informed by data and our personal
+experiences.
+
+*Codes of group interest:* \* Hennepin county: 27053 \* Carver county :
+27019 \* Wake county: 37183 \* Durham county: 37063 \* Orleans county:
+22071 \* St. Tammany Parish county: 22103
+
 ``` r
-#So that everyone can run this code snippet
 #So that everyone can run this code snippet
 df_q8 <- df_normalized 
 
@@ -1036,25 +1079,26 @@ df_other <- read_csv("./data/QuickFacts-Jul-31-2020.csv", col_types = cols(FIPS 
 ```
 
 ``` r
-df_census <- df_final_counties %>% 
+df_census <- df_final_counties %>%
+  unite(col = "location", county, state, sep = ", ", remove = FALSE) %>%
   group_by(fips) %>% 
   filter(date == max(date)) %>% 
   inner_join(df_other, by = c("fips" = as.character("FIPS"))) %>% 
-  mutate(death_ratio = deaths_per100k/cases_per100k)
+  mutate(death_ratio = deaths_per100k/cases_per100k) %>% 
+  ungroup()
 
 df_census
 ```
 
     ## # A tibble: 6 x 41
-    ## # Groups:   fips [6]
-    ##   date       location county state fips  cases deaths population cases_per100k
-    ##   <date>     <chr>    <chr>  <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
-    ## 1 2020-07-29 Orleans… Orlea… Loui… 22071 10120    559     389648         2597.
-    ## 2 2020-07-30 Wake, N… Wake   Nort… 37183 10767    126    1046558         1029.
-    ## 3 2020-07-31 St. Tam… St. T… Loui… 22103  4621    201     252093         1833.
-    ## 4 2020-07-31 Carver,… Carver Minn… 27019   744      2     100416          741.
-    ## 5 2020-07-31 Hennepi… Henne… Minn… 27053 17316    813    1235478         1402.
-    ## 6 2020-07-31 Durham,… Durham Nort… 37063  5789     77     306457         1889.
+    ##   date       county location state fips  cases deaths population cases_per100k
+    ##   <date>     <chr>  <chr>    <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
+    ## 1 2020-07-29 Orlea… Orleans… Loui… 22071 10120    559     389648         2597.
+    ## 2 2020-07-30 Wake   Wake, N… Nort… 37183 10767    126    1046558         1029.
+    ## 3 2020-07-31 St. T… St. Tam… Loui… 22103  4621    201     252093         1833.
+    ## 4 2020-07-31 Carver Carver,… Minn… 27019   744      2     100416          741.
+    ## 5 2020-07-31 Henne… Hennepi… Minn… 27053 17316    813    1235478         1402.
+    ## 6 2020-07-31 Durham Durham,… Nort… 37063  5789     77     306457         1889.
     ## # … with 32 more variables: deaths_per100k <dbl>, deathratio_per100k <dbl>,
     ## #   state_max_cases_per100k <dbl>, Location <chr>,
     ## #   `Population_07/01/2019` <dbl>, `Population_04/01/2019` <dbl>,
@@ -1195,6 +1239,7 @@ df_census %>%
   geom_point(aes(color = county, shape = state), size = 3) +
   scale_color_discrete(name = "County") +
   scale_shape_discrete(name = "State") +
+  facet_grid(.~state) +
   theme_minimal() +
   labs(
     title = "COVID-19 cases per 100,000 persons co-varying with County Poverty",
@@ -1219,6 +1264,7 @@ df_census %>%
   geom_point(aes(color = county, shape = state), size = 3) +
   scale_color_discrete(name = "County") +
   scale_shape_discrete(name = "State") +
+  facet_grid(.~state) +
   theme_minimal() +
   labs(
     title = "COVID-19 deaths per 100,000 persons co-varying with County Poverty",
@@ -1252,6 +1298,31 @@ df_census %>%
 ```
 
 ![](c06-covid19-assignment_files/figure-gfm/q8-current%20status-8.png)<!-- -->
+
+``` r
+df_census %>% 
+  ggplot(
+    aes(
+      x = no_health_insurance_under65, 
+      y = deaths_per100k,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  facet_grid(.~state) +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per cases per 100,000 persons co-varying with\n Population Density",
+    subtitle = "Using 2019 US Census estimates and most recent COVID-19 Cases Count in Data Set",
+    x = "% County Residents with No Health Insurance and Under 65",
+    y = "Deaths per cases per 100,000 persons"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-current%20status-9.png)<!-- -->
 
 ### Aside: Some visualization tricks
 
