@@ -598,89 +598,248 @@ my_counties_masks_result_pivot %>%
 
 ```{r q8-final counties}
 #So that everyone can run this code snippet
-df_q8 <- df_normalized
+#So that everyone can run this code snippet
+df_q8 <- df_normalized 
 
 #Counties of interest
 final_counties <- c(27053, 27019, 37183, 37063, 22071, 22103)
 
 #Running Total and Ratio calculations
-df_final_counties <- df_q8 %>% 
+df_final_counties <- df_q8 %>%
+  unite(col = "location", county, state, sep = ", ", remove = FALSE) %>% 
   filter(fips == final_counties) %>%
   group_by(fips) %>% 
-  mutate(
-    deathratio_per100k = deaths_per100k/cases_per100k
-  )
+  mutate(deathratio_per100k = deaths_per100k/cases_per100k) %>%
+  ungroup() %>%
+  group_by(state) %>%
+  mutate(state_max_cases_per100k = max(cases_per100k))
 
-#Daily 
-final_counties_cases <- df_final_counties %>% 
+
+# Cases 
+df_final_counties %>% 
   ggplot(
-    aes(
-      date, 
-      cases_per100k, 
-      color = fct_reorder2(
-        county, 
-        date, 
-        cases_per100k), 
-      linetype = state)
+    aes(date, cases_per100k, 
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      linetype = fct_reorder(state, desc(state_max_cases_per100k))
+    )
   ) +
   geom_line() +
-  # scale_y_log10(labels = scales::label_number_si()) +
-  scale_linetype_discrete(name = "State") +
   scale_color_discrete(name = "County") +
+  scale_linetype_discrete(name = "State") +
   theme_minimal() +
   labs(
-    title = "Cumulative COVID19 Cases",
+    title = "COVID-19 cases per 100,000 persons in select US counties",
     x = "Date",
-    y = "Cases (per 100,000 persons)"
+    y = "Cases per 100,000 persons"
   )
 
-final_counties_deaths <- df_final_counties %>% 
+# Deaths
+df_final_counties %>% 
   ggplot(
-    aes(
-      date, 
-      deaths_per100k, 
-      color = fct_reorder2(
-        county, 
-        date, 
-        cases_per100k), 
-      linetype = state)
+    aes(date, deaths_per100k, 
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      linetype = fct_reorder(state, desc(state_max_cases_per100k))
+    )
   ) +
   geom_line() +
-  # scale_y_log10(labels = scales::label_number_si()) +
-  scale_linetype_discrete(name = "State") +
   scale_color_discrete(name = "County") +
+  scale_linetype_discrete(name = "State") +
   theme_minimal() +
   labs(
-    title = "Cumulative COVID19 Deaths",
+    title = "COVID-19 deaths per 100,000 persons in select US counties",
     x = "Date",
-    y = "Deaths (per 100,000 persons)"
+    y = "Deaths per 100,000 persons"
   )
 
-final_counties_deathratio <- df_final_counties %>%
+# Death Ratio
+df_final_counties %>%
   ggplot(
-    aes(
-      date, 
-      deathratio_per100k, 
-      color = fct_reorder2(
-        county, 
-        date, 
-        cases_per100k), 
-      linetype = state)
+    aes(date, deathratio_per100k, 
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      linetype = fct_reorder(state, desc(state_max_cases_per100k))
+    )
   ) +
   geom_line() +
-  scale_linetype_discrete(name = "State") +
   scale_color_discrete(name = "County") +
+  scale_linetype_discrete(name = "State") +
   theme_minimal() +
   labs(
-    title = "Cumulative COVID19 Cases: Deaths Ratio",
+    title = "COVID-19 deaths per cases in select US counties",
     x = "Date",
-    y = "Death: Cases Ratio (per 100,000 persons)"
+    y = "Deaths per cases of COVID-19"
   )
-
-final_counties_cases
-final_counties_deaths
-final_counties_deathratio
 ```
+
+```{r q8-other census}
+## TASK: Load the census bureau data with the following tibble name.
+df_other <- read_csv("./data/QuickFacts-Jul-31-2020.csv", col_types = cols(FIPS = col_character()))
+
+```
+
+```{r q8-current status}
+df_census <- df_final_counties %>% 
+  group_by(fips) %>% 
+  filter(date == max(date)) %>% 
+  inner_join(df_other, by = c("fips" = as.character("FIPS"))) %>% 
+  mutate(death_ratio = deaths_per100k/cases_per100k)
+
+df_census
+
+df_census %>% 
+  ggplot(
+    aes(x = age_over65, 
+        y = cases_per100k,
+        color = fct_reorder2(location, state, state_max_cases_per100k), 
+        shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 cases per 100,000 persons in select US counties",
+    x = "% County residents aged over 65",
+    y = "Cases per 100,000 persons"
+  )
+
+df_census %>% 
+  ggplot(
+    aes(x = age_over65, 
+        y = deaths_per100k,
+        color = fct_reorder2(location, state, state_max_cases_per100k), 
+        shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons in select US counties",
+    x = "% County residents aged over 65",
+    y = "Deaths per 100,000 persons"
+  )
+
+df_census %>% 
+  ggplot(
+    aes(
+      x = disability_under65, 
+      y = cases_per100k,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons in select US counties",
+    x = "% County Residents with Disabilities Under 65",
+    y = "Cases per 100,000 persons"
+  )
+
+df_census %>% 
+  ggplot(
+    aes(
+      x = disability_under65, 
+      y = deaths_per100k,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons in select US counties",
+    x = "% County Residents with Disabilities Under 65",
+    y = "Deaths per 100,000 persons"
+  )
+
+df_census %>% 
+  ggplot(
+    aes(
+      x = disability_under65, 
+      y = death_ratio,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons in select US counties",
+    x = "% County Residents with Disabilities Under 65",
+    y = "Deaths per cases per 100,000 persons"
+  )
+
+
+df_census %>% 
+  ggplot(
+    aes(
+      x = poverty, 
+      y = cases_per100k,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 cases per 100,000 persons co-varying with County Poverty",
+    subtitle = "Using 2019 US Census estimates and most recent COVID-19 Cases Count in Data Set",
+    x = "% County Residents living in Poverty",
+    y = "Cases per 100,000 persons"
+  )
+
+df_census %>% 
+  ggplot(
+    aes(
+      x = poverty, 
+      y = deaths_per100k,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons co-varying with County Poverty",
+    subtitle = "Using 2019 US Census estimates and most recent COVID-19 Cases Count in Data Set",
+    x = "% County Residents living in Poverty",
+    y = "Deaths per 100,000 persons"
+  )
+
+df_census %>% 
+  ggplot(
+    aes(
+      x = poverty, 
+      y = death_ratio,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per cases per 100,000 persons co-varying with County Poverty",
+    x = "% County Residents living in Poverty",
+    y = "Deaths per cases per 100,000 persons"
+  )
+
+```
+
 
 ### Aside: Some visualization tricks
 <!-- ------------------------- -->
@@ -704,6 +863,10 @@ df_normalized %>%
     y = "Cases (per 100,000 persons)"
   )
 ```
+
+
+
+
 
 *Tricks*:
 

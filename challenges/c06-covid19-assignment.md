@@ -264,7 +264,7 @@ df_pop %>% glimpse
 df_covid %>% glimpse
 ```
 
-    ## Rows: 385,985
+    ## Rows: 389,202
     ## Columns: 6
     ## $ date   <date> 2020-01-21, 2020-01-22, 2020-01-23, 2020-01-24, 2020-01-24, 2…
     ## $ county <chr> "Snohomish", "Snohomish", "Snohomish", "Cook", "Snohomish", "O…
@@ -384,7 +384,7 @@ df_normalized %>%
   arrange(fips, date)
 ```
 
-    ## # A tibble: 385,985 x 9
+    ## # A tibble: 389,202 x 9
     ##    date       county state fips  cases deaths population cases_per100k
     ##    <date>     <chr>  <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
     ##  1 2020-03-24 Autau… Alab… 01001     1      0      55200          1.81
@@ -397,7 +397,7 @@ df_normalized %>%
     ##  8 2020-03-31 Autau… Alab… 01001     7      0      55200         12.7 
     ##  9 2020-04-01 Autau… Alab… 01001    10      0      55200         18.1 
     ## 10 2020-04-02 Autau… Alab… 01001    10      0      55200         18.1 
-    ## # … with 385,975 more rows, and 1 more variable: deaths_per100k <dbl>
+    ## # … with 389,192 more rows, and 1 more variable: deaths_per100k <dbl>
 
 You may use the following test to check your work.
 
@@ -461,7 +461,7 @@ df_q6
     ## # A tibble: 1 x 4
     ##   cases_per100k_mean cases_per100k_sd deaths_per100k_mean deaths_per100k_sd
     ##                <dbl>            <dbl>               <dbl>             <dbl>
-    ## 1               361.             669.                11.7              26.7
+    ## 1               366.             675.                11.8              26.9
 
 **q7** Find the top 10 counties in terms of `cases_per100k`, and the top
 10 in terms of `deaths_per100k`. Report the population of each county
@@ -497,16 +497,16 @@ df_q7_1
     ## # A tibble: 3,242 x 7
     ##    county state population cases_per100k_m… cases_per100k_sd deaths_per100k_…
     ##    <chr>  <chr>      <dbl>            <dbl>            <dbl>            <dbl>
-    ##  1 Trous… Tenn…       9573           11046.            6660.            35.3 
-    ##  2 Dakota Nebr…      20317            6957.            2949.           112.  
-    ##  3 Lake   Tenn…       7526            6187.            3833.             0   
-    ##  4 Nobles Minn…      21839            5861.            2610.            17.5 
-    ##  5 Linco… Arka…      13695            5313.            3174.            46.3 
-    ##  6 Buena… Iowa       20260            4373.            3854.            23.8 
-    ##  7 Colfax Nebr…      10760            4212.            2570.            22.5 
-    ##  8 Ford   Kans…      34484            3467.            2422.            13.8 
-    ##  9 Seward Kans…      22692            3346.            1590.             6.28
-    ## 10 Bleds… Tenn…      14602            3339.            1693.             4.38
+    ##  1 Trous… Tenn…       9573           11088.            6650.            35.6 
+    ##  2 Dakota Nebr…      20317            6979.            2944.           113.  
+    ##  3 Lake   Tenn…       7526            6219.            3831.             0   
+    ##  4 Nobles Minn…      21839            5879.            2606.            17.5 
+    ##  5 Linco… Arka…      13695            5336.            3174.            46.6 
+    ##  6 Buena… Iowa       20260            4411.            3859.            24.1 
+    ##  7 Colfax Nebr…      10760            4230.            2568.            22.7 
+    ##  8 Ford   Kans…      34484            3487.            2423.            13.9 
+    ##  9 Seward Kans…      22692            3362.            1593.             6.38
+    ## 10 Brist… Alas…        890            3349.            2946.             0   
     ## # … with 3,232 more rows, and 1 more variable: deaths_per100k_sd <dbl>
 
 ``` r
@@ -536,16 +536,16 @@ df_q7_2
     ## # A tibble: 3,242 x 7
     ##    county state population cases_per100k_m… cases_per100k_sd deaths_per100k_…
     ##    <chr>  <chr>      <dbl>            <dbl>            <dbl>            <dbl>
-    ##  1 Rando… Geor…       7087            2209.             949.             247.
-    ##  2 Terre… Geor…       8859            2057.             845.             233.
-    ##  3 Hanco… Geor…       8535            1837.            1012.             222.
-    ##  4 Early  Geor…      10348            2044.             895.             215.
-    ##  5 Essex  New …     793555            1696.             860.             161.
-    ##  6 St. J… Loui…      43446            1717.             806.             147.
-    ##  7 Union  New …     553066            2101.            1120.             142.
-    ##  8 Nassau New …    1356564            2252.            1139.             137.
-    ##  9 Passa… New …     504041            2322.            1296.             135.
-    ## 10 Turner Geor…       7962            1372.             859.             132.
+    ##  1 Rando… Geor…       7087            2220.             953.             248.
+    ##  2 Terre… Geor…       8859            2066.             848.             234.
+    ##  3 Hanco… Geor…       8535            1849.            1016.             224.
+    ##  4 Early  Geor…      10348            2054.             898.             216.
+    ##  5 Essex  New …     793555            1701.             859.             162.
+    ##  6 St. J… Loui…      43446            1727.             811.             148.
+    ##  7 Union  New …     553066            2108.            1118.             143.
+    ##  8 Nassau New …    1356564            2258.            1137.             137.
+    ##  9 Passa… New …     504041            2330.            1295.             136.
+    ## 10 Turner Geor…       7962            1382.             865.             132.
     ## # … with 3,232 more rows, and 1 more variable: deaths_per100k_sd <dbl>
 
 **Observations**:
@@ -825,8 +825,8 @@ df_Minnesota <- df_normalized %>%
 df_Oregon
 ```
 
-    ## # A tibble: 154 x 5
-    ## # Groups:   date [154]
+    ## # A tibble: 155 x 5
+    ## # Groups:   date [155]
     ##    date       cases cases_per100k deaths deaths_per100k
     ##    <date>     <dbl>         <dbl>  <dbl>          <dbl>
     ##  1 2020-02-28     1         0.172      0              0
@@ -839,7 +839,7 @@ df_Oregon
     ##  8 2020-03-06     2         0.344      0              0
     ##  9 2020-03-07     6         2.96       0              0
     ## 10 2020-03-08    13         5.04       0              0
-    ## # … with 144 more rows
+    ## # … with 145 more rows
 
 ``` r
 df_Minnesota <- df_normalized %>% 
@@ -948,106 +948,310 @@ my_counties_masks_result_pivot %>%
 
 ``` r
 #So that everyone can run this code snippet
-df_q8 <- df_normalized
+#So that everyone can run this code snippet
+df_q8 <- df_normalized 
 
 #Counties of interest
 final_counties <- c(27053, 27019, 37183, 37063, 22071, 22103)
 
 #Running Total and Ratio calculations
-df_final_counties <- df_q8 %>% 
+df_final_counties <- df_q8 %>%
+  unite(col = "location", county, state, sep = ", ", remove = FALSE) %>% 
   filter(fips == final_counties) %>%
   group_by(fips) %>% 
-  mutate(
-    deathratio_per100k = deaths_per100k/cases_per100k
-  )
-```
+  mutate(deathratio_per100k = deaths_per100k/cases_per100k) %>%
+  ungroup() %>%
+  group_by(state) %>%
+  mutate(state_max_cases_per100k = max(cases_per100k))
 
-    ## Warning in fips == final_counties: longer object length is not a multiple of
-    ## shorter object length
 
-``` r
-#Daily 
-final_counties_cases <- df_final_counties %>% 
+# Cases 
+df_final_counties %>% 
   ggplot(
-    aes(
-      date, 
-      cases_per100k, 
-      color = fct_reorder2(
-        county, 
-        date, 
-        cases_per100k), 
-      linetype = state)
+    aes(date, cases_per100k, 
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      linetype = fct_reorder(state, desc(state_max_cases_per100k))
+    )
   ) +
   geom_line() +
-  # scale_y_log10(labels = scales::label_number_si()) +
-  scale_linetype_discrete(name = "State") +
   scale_color_discrete(name = "County") +
+  scale_linetype_discrete(name = "State") +
   theme_minimal() +
   labs(
-    title = "Cumulative COVID19 Cases",
+    title = "COVID-19 cases per 100,000 persons in select US counties",
     x = "Date",
-    y = "Cases (per 100,000 persons)"
+    y = "Cases per 100,000 persons"
   )
-
-final_counties_deaths <- df_final_counties %>% 
-  ggplot(
-    aes(
-      date, 
-      deaths_per100k, 
-      color = fct_reorder2(
-        county, 
-        date, 
-        cases_per100k), 
-      linetype = state)
-  ) +
-  geom_line() +
-  # scale_y_log10(labels = scales::label_number_si()) +
-  scale_linetype_discrete(name = "State") +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
-  labs(
-    title = "Cumulative COVID19 Deaths",
-    x = "Date",
-    y = "Deaths (per 100,000 persons)"
-  )
-
-final_counties_deathratio <- df_final_counties %>%
-  ggplot(
-    aes(
-      date, 
-      deathratio_per100k, 
-      color = fct_reorder2(
-        county, 
-        date, 
-        cases_per100k), 
-      linetype = state)
-  ) +
-  geom_line() +
-  scale_linetype_discrete(name = "State") +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
-  labs(
-    title = "Cumulative COVID19 Cases: Deaths Ratio",
-    x = "Date",
-    y = "Death: Cases Ratio (per 100,000 persons)"
-  )
-
-final_counties_cases
 ```
 
 ![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-1.png)<!-- -->
 
 ``` r
-final_counties_deaths
+# Deaths
+df_final_counties %>% 
+  ggplot(
+    aes(date, deaths_per100k, 
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      linetype = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_line() +
+  scale_color_discrete(name = "County") +
+  scale_linetype_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons in select US counties",
+    x = "Date",
+    y = "Deaths per 100,000 persons"
+  )
 ```
 
 ![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-2.png)<!-- -->
 
 ``` r
-final_counties_deathratio
+# Death Ratio
+df_final_counties %>%
+  ggplot(
+    aes(date, deathratio_per100k, 
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      linetype = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_line() +
+  scale_color_discrete(name = "County") +
+  scale_linetype_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per cases in select US counties",
+    x = "Date",
+    y = "Deaths per cases of COVID-19"
+  )
 ```
 
 ![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-3.png)<!-- -->
+
+``` r
+## TASK: Load the census bureau data with the following tibble name.
+df_other <- read_csv("./data/QuickFacts-Jul-31-2020.csv", col_types = cols(FIPS = col_character()))
+```
+
+``` r
+df_census <- df_final_counties %>% 
+  group_by(fips) %>% 
+  filter(date == max(date)) %>% 
+  inner_join(df_other, by = c("fips" = as.character("FIPS"))) %>% 
+  mutate(death_ratio = deaths_per100k/cases_per100k)
+
+df_census
+```
+
+    ## # A tibble: 6 x 41
+    ## # Groups:   fips [6]
+    ##   date       location county state fips  cases deaths population cases_per100k
+    ##   <date>     <chr>    <chr>  <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
+    ## 1 2020-07-29 Orleans… Orlea… Loui… 22071 10120    559     389648         2597.
+    ## 2 2020-07-30 Wake, N… Wake   Nort… 37183 10767    126    1046558         1029.
+    ## 3 2020-07-31 St. Tam… St. T… Loui… 22103  4621    201     252093         1833.
+    ## 4 2020-07-31 Carver,… Carver Minn… 27019   744      2     100416          741.
+    ## 5 2020-07-31 Hennepi… Henne… Minn… 27053 17316    813    1235478         1402.
+    ## 6 2020-07-31 Durham,… Durham Nort… 37063  5789     77     306457         1889.
+    ## # … with 32 more variables: deaths_per100k <dbl>, deathratio_per100k <dbl>,
+    ## #   state_max_cases_per100k <dbl>, Location <chr>,
+    ## #   `Population_07/01/2019` <dbl>, `Population_04/01/2019` <dbl>,
+    ## #   age_under5 <dbl>, `age<18` <dbl>, age_over65 <dbl>, female <dbl>,
+    ## #   white <dbl>, black_african_american <dbl>,
+    ## #   `american-indian_native-alaskan` <dbl>, asian <dbl>,
+    ## #   `hawaiian-pacific_islander` <dbl>, two_races <dbl>,
+    ## #   `hispanic-latino` <dbl>, `white-alone` <dbl>, foreign <dbl>, housing <dbl>,
+    ## #   owns_house <dbl>, median_house_value <dbl>, median_costs_mortgage <dbl>,
+    ## #   median_costs_no_mortgage <dbl>, median_rent <dbl>,
+    ## #   disability_under65 <dbl>, no_health_insurance_under65 <dbl>,
+    ## #   median_household_income <dbl>, per_capita_income <dbl>, poverty <dbl>,
+    ## #   population_density <dbl>, death_ratio <dbl>
+
+``` r
+df_census %>% 
+  ggplot(
+    aes(x = age_over65, 
+        y = cases_per100k,
+        color = fct_reorder2(location, state, state_max_cases_per100k), 
+        shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 cases per 100,000 persons in select US counties",
+    x = "% County residents aged over 65",
+    y = "Cases per 100,000 persons"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-current%20status-1.png)<!-- -->
+
+``` r
+df_census %>% 
+  ggplot(
+    aes(x = age_over65, 
+        y = deaths_per100k,
+        color = fct_reorder2(location, state, state_max_cases_per100k), 
+        shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons in select US counties",
+    x = "% County residents aged over 65",
+    y = "Deaths per 100,000 persons"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-current%20status-2.png)<!-- -->
+
+``` r
+df_census %>% 
+  ggplot(
+    aes(
+      x = disability_under65, 
+      y = cases_per100k,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons in select US counties",
+    x = "% County Residents with Disabilities Under 65",
+    y = "Cases per 100,000 persons"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-current%20status-3.png)<!-- -->
+
+``` r
+df_census %>% 
+  ggplot(
+    aes(
+      x = disability_under65, 
+      y = deaths_per100k,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons in select US counties",
+    x = "% County Residents with Disabilities Under 65",
+    y = "Deaths per 100,000 persons"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-current%20status-4.png)<!-- -->
+
+``` r
+df_census %>% 
+  ggplot(
+    aes(
+      x = disability_under65, 
+      y = death_ratio,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons in select US counties",
+    x = "% County Residents with Disabilities Under 65",
+    y = "Deaths per cases per 100,000 persons"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-current%20status-5.png)<!-- -->
+
+``` r
+df_census %>% 
+  ggplot(
+    aes(
+      x = poverty, 
+      y = cases_per100k,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 cases per 100,000 persons co-varying with County Poverty",
+    subtitle = "Using 2019 US Census estimates and most recent COVID-19 Cases Count in Data Set",
+    x = "% County Residents living in Poverty",
+    y = "Cases per 100,000 persons"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-current%20status-6.png)<!-- -->
+
+``` r
+df_census %>% 
+  ggplot(
+    aes(
+      x = poverty, 
+      y = deaths_per100k,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per 100,000 persons co-varying with County Poverty",
+    subtitle = "Using 2019 US Census estimates and most recent COVID-19 Cases Count in Data Set",
+    x = "% County Residents living in Poverty",
+    y = "Deaths per 100,000 persons"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-current%20status-7.png)<!-- -->
+
+``` r
+df_census %>% 
+  ggplot(
+    aes(
+      x = poverty, 
+      y = death_ratio,
+      color = fct_reorder2(location, state, state_max_cases_per100k), 
+      shape = fct_reorder(state, desc(state_max_cases_per100k))
+    )
+  ) +
+  geom_point(aes(color = county, shape = state), size = 3) +
+  scale_color_discrete(name = "County") +
+  scale_shape_discrete(name = "State") +
+  theme_minimal() +
+  labs(
+    title = "COVID-19 deaths per cases per 100,000 persons co-varying with County Poverty",
+    x = "% County Residents living in Poverty",
+    y = "Deaths per cases per 100,000 persons"
+  )
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-current%20status-8.png)<!-- -->
 
 ### Aside: Some visualization tricks
 
@@ -1075,7 +1279,7 @@ df_normalized %>%
   )
 ```
 
-    ## Warning: Removed 137 row(s) containing missing values (geom_path).
+    ## Warning: Removed 138 row(s) containing missing values (geom_path).
 
 ![](c06-covid19-assignment_files/figure-gfm/ma-example-1.png)<!-- -->
 
