@@ -958,9 +958,6 @@ df_final_counties <- df_q8 %>%
   filter(fips == final_counties) %>%
   group_by(fips) %>% 
   mutate(
-    running_cases_per100k = cumsum(cases_per100k), 
-    running_deaths_per100k = cumsum(deaths_per100k), 
-    running_deathratio_per100k = running_deaths_per100k/running_cases_per100k,
     deathratio_per100k = deaths_per100k/cases_per100k
   )
 ```
