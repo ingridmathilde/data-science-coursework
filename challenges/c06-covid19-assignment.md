@@ -608,8 +608,16 @@ df_q8 <- df_normalized
 
 Codes of interest: \* Multnomah county: 41051 \* Washington county :
 41067 \* Clackamas county: 41005 \* Escambia county: 12033 \* Santa Rosa
-county : 12113 \* Olmsted county: 27109 \* Ramsey county: 27123 \*
-Hennepin county: 27053
+county : 12113 \* Olmsted county: 27109
+
+  - Hennepin county: 27053
+  - Carver county : 27019
+  - Wake county: 37183
+  - Durham county: 37063
+  - Orleans county: 22071
+  - St. Tammany Parish county: 22103
+
+<!-- end list -->
 
 ``` r
 counties <- c(41051, 41067, 41005, 12033, 12113, 27109, 27123, 27053)
@@ -936,6 +944,198 @@ my_counties_masks_result_pivot %>%
 ```
 
 ![](c06-covid19-assignment_files/figure-gfm/q8-masks-1.png)<!-- -->
+
+``` r
+#So that everyone can run this code snippet
+df_q8 <- df_normalized
+
+#Counties of interest
+final_counties <- c(27053, 27019, 37183, 37063, 22071, 22103)
+
+#Running Total and Ratio calculations
+df_final_counties <- df_q8 %>% 
+  filter(fips == final_counties) %>%
+  group_by(fips) %>% 
+  mutate(
+    running_cases_per100k = cumsum(cases_per100k), 
+    running_deaths_per100k = cumsum(deaths_per100k), 
+    running_deathratio_per100k = running_deaths_per100k/running_cases_per100k,
+    deathratio_per100k = deaths_per100k/cases_per100k
+  )
+```
+
+    ## Warning in fips == final_counties: longer object length is not a multiple of
+    ## shorter object length
+
+``` r
+#Daily 
+final_counties_cases <- df_final_counties %>% 
+  ggplot(
+    aes(
+      date, 
+      cases_per100k, 
+      color = fct_reorder2(
+        county, 
+        date, 
+        cases_per100k), 
+      linetype = state)
+  ) +
+  geom_line() +
+  # scale_y_log10(labels = scales::label_number_si()) +
+  scale_linetype_discrete(name = "State") +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    title = "Daily COVID19 Cases",
+    x = "Date",
+    y = "New Cases (per 100,000 persons)"
+  )
+
+final_counties_deaths <- df_final_counties %>% 
+  ggplot(
+    aes(
+      date, 
+      deaths_per100k, 
+      color = fct_reorder2(
+        county, 
+        date, 
+        cases_per100k), 
+      linetype = state)
+  ) +
+  geom_line() +
+  # scale_y_log10(labels = scales::label_number_si()) +
+  scale_linetype_discrete(name = "State") +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    title = "Daily COVID19 Deaths",
+    x = "Date",
+    y = "New Deaths (per 100,000 persons)"
+  )
+
+final_counties_rcases <- df_final_counties %>%
+  ggplot(
+    aes(
+      date, 
+      running_cases_per100k, 
+      color = fct_reorder2(
+        county, 
+        date, 
+        cases_per100k), 
+     linetype = state)
+  ) +
+  geom_line() +
+  scale_y_log10(labels = scales::label_number_si()) +
+  scale_linetype_discrete(name = "State") +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    title = "Running Total of COVID19 Cases",
+    x = "Date",
+    y = "Running Total of Cases (per 100,000 persons) on log scale"
+  )
+
+final_counties_rdeaths <- df_final_counties %>%
+  ggplot(
+    aes(
+      date, 
+      running_deaths_per100k, 
+      color = fct_reorder2(
+        county, 
+        date, 
+        cases_per100k), 
+      linetype = state)
+  ) +
+  geom_line() +
+  scale_y_log10(labels = scales::label_number_si()) +
+  scale_linetype_discrete(name = "State") +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    title = "Running Total of COVID19-related Deaths",
+    x = "Date",
+    y = "Running Total of Deaths (per 100,000 persons) on log scale"
+  )
+
+
+final_counties_rdeathratio <- df_final_counties %>%
+  ggplot(
+    aes(
+      date, 
+      running_deathratio_per100k, 
+      color = fct_reorder2(
+        county, 
+        date, 
+        cases_per100k), 
+      linetype = state)
+  ) +
+  geom_line() +
+  scale_linetype_discrete(name = "State") +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    title = "Running COVID19 Death: Cases Ratio",
+    x = "Date",
+    y = "Running Death: Cases Ratio (per 100,000 persons)"
+  )
+
+final_counties_deathratio <- df_final_counties %>%
+  ggplot(
+    aes(
+      date, 
+      deathratio_per100k, 
+      color = fct_reorder2(
+        county, 
+        date, 
+        cases_per100k), 
+      linetype = state)
+  ) +
+  geom_line() +
+  scale_linetype_discrete(name = "State") +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    title = "Daily COVID19 Cases: Deaths Ratio",
+    x = "Date",
+    y = "Daily Death: Cases Ratio (per 100,000 persons)"
+  )
+
+final_counties_cases
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-1.png)<!-- -->
+
+``` r
+final_counties_deaths
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-2.png)<!-- -->
+
+``` r
+final_counties_rcases
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-3.png)<!-- -->
+
+``` r
+final_counties_rdeaths
+```
+
+    ## Warning: Transformation introduced infinite values in continuous y-axis
+
+![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-4.png)<!-- -->
+
+``` r
+final_counties_rdeathratio
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-5.png)<!-- -->
+
+``` r
+final_counties_deathratio
+```
+
+![](c06-covid19-assignment_files/figure-gfm/q8-final%20counties-6.png)<!-- -->
 
 ### Aside: Some visualization tricks
 
