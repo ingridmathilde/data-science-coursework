@@ -268,7 +268,7 @@ df_pop %>% glimpse
 df_covid %>% glimpse
 ```
 
-    ## Rows: 389,202
+    ## Rows: 392,419
     ## Columns: 6
     ## $ date   <date> 2020-01-21, 2020-01-22, 2020-01-23, 2020-01-24, 2020-01-24, 2…
     ## $ county <chr> "Snohomish", "Snohomish", "Snohomish", "Cook", "Snohomish", "O…
@@ -386,7 +386,7 @@ df_normalized %>%
   arrange(fips, date)
 ```
 
-    ## # A tibble: 389,202 x 9
+    ## # A tibble: 392,419 x 9
     ##    date       county state fips  cases deaths population cases_per100k
     ##    <date>     <chr>  <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
     ##  1 2020-03-24 Autau… Alab… 01001     1      0      55200          1.81
@@ -399,7 +399,7 @@ df_normalized %>%
     ##  8 2020-03-31 Autau… Alab… 01001     7      0      55200         12.7 
     ##  9 2020-04-01 Autau… Alab… 01001    10      0      55200         18.1 
     ## 10 2020-04-02 Autau… Alab… 01001    10      0      55200         18.1 
-    ## # … with 389,192 more rows, and 1 more variable: deaths_per100k <dbl>
+    ## # … with 392,409 more rows, and 1 more variable: deaths_per100k <dbl>
 
 You may use the following test to check your work.
 
@@ -707,72 +707,73 @@ family lives) to examine trends or just differences.
   - Clackamas county: 41005
   - Escambia county: 12033
   - Santa Rosa county : 12113
-  - Olmsted county: 27109
   - Hennepin county: 27053
   - Carver county : 27019
 
 <!-- end list -->
 
 ``` r
-df_q8 <- df_normalized
+df_q8 <- df_normalized %>% 
+  mutate(death_rate_per100k = deaths_per100k/cases_per100k*100) %>% 
+  arrange(fips, date) %>% 
+  unite(col = "location", county, state, sep = ", ", remove = FALSE)
 ```
 
 ``` r
-counties <- c(41051, 41067, 41005, 12033, 12113, 27109, 27053, 27019)
-states <- c("Oregon", "Minnesota", "Florida")
+counties <- c(41051, 41067, 41005, 12033, 12113, 27053, 27019)
 
-my_counties <- df_q8 %>% 
-  filter(fips == counties) %>%
-  group_by(fips) %>% 
-  mutate(
-    death_rate = (deaths)/cases*100
-  )
-```
+my_counties <- df_q8 %>%
+  filter(fips %in% counties) %>%
+  group_by(state) %>%
+  mutate(state_max_cases_per100k = max(cases_per100k)) %>%
+  ungroup() %>%
+  arrange(fips, date)
 
-    ## Warning in fips == counties: longer object length is not a multiple of shorter
-    ## object length
-
-``` r
 county_cases <- my_counties %>%
   ggplot(
-    aes(date, cases_per100k, color = fct_reorder2(county, date, cases_per100k), linetype = state)
+    aes(date, cases_per100k, color = fct_reorder2(location, date, state_max_cases_per100k), linetype = state)
   ) +
   geom_line() +
-  scale_color_discrete(name = "County") + 
+  scale_color_discrete(name = "County") +
+  scale_linetype_discrete(name = "State") +
   theme_minimal() + 
   labs(
-    title = "COVID-19 deaths per 100,000 persons vs Population",
-    subtitle = "Top 10 counties by Deaths per 100,000 person",
-    x = "Population",
-    y = "Deaths per 100,000 persons"
+    title = "COVID-19 cases per 100,000 persons over time",
+    subtitle = "Counties personally relevant to me",
+    x = "Date",
+    y = "Cases per 100,000 persons"
   )
 
 county_deaths <- my_counties %>%
   ggplot(
-    aes(date, deaths_per100k, color = fct_reorder2(county, date, cases_per100k), linetype = state)
+    aes(date, deaths_per100k, color = fct_reorder2(location, date, state_max_cases_per100k), linetype = state)
   ) +
   geom_line() +
-  # scale_y_log10(labels = scales::label_number_si()) +
   scale_color_discrete(name = "County") +
+  scale_linetype_discrete(name = "State") +
   theme_minimal() +
   labs(
+    title = "COVID-19 deaths per 100,000 persons over time",
+    subtitle = "Counties personally relevant",
     x = "Date",
-    y = "New Deaths (per 100,000 persons)"
+    y = "Deaths (per 100,000 persons)"
   )
 
 county_death_rate <- my_counties %>%
   ggplot(
-    aes(date, death_rate, color = fct_reorder2(county, date, cases_per100k), linetype = state)
+    aes(date, death_rate_per100k, color = fct_reorder2(location, date, state_max_cases_per100k), linetype = state)
   ) +
   geom_line() +
-  # scale_y_log10(labels = scales::label_number_si()) +
   scale_color_discrete(name = "County") +
+  scale_linetype_discrete(name = "State") +
   theme_minimal() +
   labs(
+    title = "COVID-19 deaths per cases per 100,000 persons over time",
+    subtitle = "Counties personally relevant to me",
     x = "Date",
-    y = "Week-to-week death rate (%)"
+    y = "Death per cases Per 100,000 persons"
   ) +
-  coord_cartesian(ylim = c(0,15))
+  coord_cartesian(ylim = c(0, 15))
 ```
 
 ``` r
@@ -781,125 +782,106 @@ county_cases
 
 ![](c06-covid19-assignment_files/figure-gfm/my%20counties%20cases-1.png)<!-- -->
 
+***Observations:***
+
+  - **Of the state represented in the plot, COVID has represented a
+    political philosophical challenge in Florida (for example, see [the
+    firing of Rebekah
+    Jones](https://www.npr.org/2020/06/29/884551391/florida-scientist-says-she-was-fired-for-not-manipulating-covid-19-data)).
+    Protective measures were taken on a
+    [county-by-county](https://coronavirus.jhu.edu/data/state-timeline/new-confirmed-cases/florida/32)
+    basis. Florida has a noteable uptick of cases in mid-June. Based on
+    the timeline,
+    [June 1st](https://coronavirus.jhu.edu/data/state-timeline/new-confirmed-cases/florida/33)
+    marked the phase 1 reopening in the state of Florida despite
+    [increasing case
+    counts](\(https://www.npr.org/2020/05/18/857727091/floridas-complete-phase-1-reopening-happens-as-covid-19-cases-rise\))
+    across the state.**
+  - **Escambia and Santa Rosa counties are neighboring counties that are
+    seeing the same acceleration of cases (same slope) though the case
+    counts per 100,000 people are different.**
+  - **Hennepin county is the most populous and densely populated county
+    in Minnesota (Minneapolis) - it also has the most cases and double
+    the [positive test
+    rate](https://www.kare11.com/article/news/health/coronavirus/frey-announces-restrictions-minneapolis-after-ongoing-covid-19-issues/89-f8e45b6b-3045-402a-94cd-ceabf81023c7)
+    compared to the state. Many cases are traced to young people
+    frequenting bars (which re-opened June 1) without masks. Health
+    experts have noted that these young people may be [spreading the
+    disease](https://www.mprnews.org/story/2020/07/13/latest-on-covid19-in-mn)
+    to vulnerable community members. Hennepin county has also noted that
+    non-white people are [disproportionately affected by
+    COVID-19](https://www.startribune.com/people-of-color-in-twin-cities-continue-to-bear-brunt-of-coronavirus/571982452/)
+    and this is true of [all
+    ages.](https://www.mprnews.org/story/2020/07/29/higher-covid19-rates-seen-in-black-and-hispanic-children-in-minnesota)**
+  - **Carver county (105,000 people) is smaller than Hennepin county
+    (\~1.2 million people) and this may be affecting the results (per
+    100,000 people).**
+  - **Multnomah county (Portland, OR) and the tri-county area (Clackamas
+    and Washington) are all experiencing the pandemic similarly - most
+    of the cases in Oregon as of
+    [July 31st](https://www.kgw.com/article/news/health/coronavirus/6-more-deaths-373-new-covid-19-cases-in-oregon/283-4f2e5c37-83f2-4f22-bc89-f1f28b5520c2)
+    where in people below the age of 55.**
+
+<!-- end list -->
+
 ``` r
 county_deaths
 ```
 
 ![](c06-covid19-assignment_files/figure-gfm/my%20counties%20deaths-1.png)<!-- -->
 
+***Observations:***
+
+  - **Pensacola (includes Escambia and Santa Rosa counties) news sources
+    [report](https://www.pnj.com/story/news/2020/07/15/covid-19-florida-3rd-state-top-300-000-escambia-santa-rosa-add-373/5442638002/)
+    that at least 39 deaths (almost all deaths to date) were residents
+    of staff of nursing homes in these counties.**
+  - **The number of deaths in Hennepin county are notably higher than
+    than the other counties observed. Over 81% of the people who died
+    lived in assisted living/nursing homes. There are [many nursing
+    homes](https://www.startribune.com/why-does-hennepin-county-have-so-many-more-covid-19-fatalities-than-ramsey/570047761/?refresh=true)
+    in Hennepin county.**
+  - **Something that is odd - it appears that the total number of deaths
+    for Carver county decreases in mid-June. No explanation for this
+    after some research… Maybe a typo?**
+  - **In Oregon, as of
+    [July 31st](https://www.kgw.com/article/news/health/coronavirus/6-more-deaths-373-new-covid-19-cases-in-oregon/283-4f2e5c37-83f2-4f22-bc89-f1f28b5520c2),
+    most of the people who died are over the age of 55.**
+
+<!-- end list -->
+
 ``` r
 county_death_rate
 ```
 
 ![](c06-covid19-assignment_files/figure-gfm/my%20counties%20death%20rate-1.png)<!-- -->
+***Observations:***
 
-``` r
-###IN PROGRESS###
-states <- c("Oregon", "Minnesota", "Florida")
+  - **I zoomed the axes because at the beginning of the pandemic,
+    [testing was
+    sparse](https://coronavirus.jhu.edu/testing/individual-states) so
+    the ratio will skew high especially if a death occurs early on (as
+    is the case for Santa Rosa county when someone [travelled
+    abroad](https://www.clickorlando.com/news/local/2020/03/05/fourth-florida-coronavirus-case-awaiting-federal-confirmation/)
+    before the pandemic was announced; and in Multnomah county where
+    [the source remains
+    unknown](https://www.opb.org/news/article/coronavirus-oregon-death-multnomah-county-va-hospital/)).**
+  - **This got me thinking about whether we can [trust this
+    ratio](https://ourworldindata.org/grapher/daily-tests-per-thousand-people-smoothed-7-day?tab=chart&country=~USA):
+    if the rate of testing is changing, how do we factor this into our
+    \[analysis\](<https://www.nature.com/articles/s41598-020-68862-x>?
+    Is there a way to correct for this with math? Reminds me of the
+    discussion in class with Zach about sampling so I did some research:
+    Diamond Princess Cruise was an interesting “sampling” method and the
+    University of Oxford did a study on it
+    [here](https://www.cebm.net/study/covid-19-transmission-aboard-the-diamond-princess-cruise-ship/).
+    I was wondering if there was a way to mathematically correct for
+    this and found this
+    [resource](https://sphweb.bumc.bu.edu/otlt/MPH-Modules/EP/EP713_DiseaseFrequency/EP713_DiseaseFrequency_print.html)
+    though it did not directly answer my question - maybe I’ll ask on
+    reddit or something?**
 
-df_states <- df_data %>% 
-  mutate(
-    cases_per100k = cases/(population/100000), 
-    deaths_per100k = deaths/(population/100000)
-  )
-
-df_Oregon <- df_normalized %>% 
-  filter(state == "Oregon") %>%
-  select(date, cases, cases_per100k, deaths, deaths_per100k) %>% 
-  group_by(date) %>%
-  mutate(
-    cases = sum(cases),
-    cases_per100k = sum(cases_per100k),
-    deaths = sum(deaths),
-    deaths_per100k = sum(deaths_per100k)
-  ) %>% 
-  distinct()
-
-df_Minnesota <- df_normalized %>% 
-  filter(state == "Minnesota") %>%
-  select(state, date, cases, cases_per100k, deaths, deaths_per100k) %>% 
-  group_by(date) %>%
-  mutate(
-    cases = sum(cases),
-    cases_per100k = sum(cases_per100k),
-    deaths = sum(deaths),
-    deaths_per100k = sum(deaths_per100k)
-  )
-
-df_Oregon
-```
-
-    ## # A tibble: 155 x 5
-    ## # Groups:   date [155]
-    ##    date       cases cases_per100k deaths deaths_per100k
-    ##    <date>     <dbl>         <dbl>  <dbl>          <dbl>
-    ##  1 2020-02-28     1         0.172      0              0
-    ##  2 2020-02-29     1         0.172      0              0
-    ##  3 2020-03-01     2         0.344      0              0
-    ##  4 2020-03-02     2         0.344      0              0
-    ##  5 2020-03-03     2         0.344      0              0
-    ##  6 2020-03-04     2         0.344      0              0
-    ##  7 2020-03-05     2         0.344      0              0
-    ##  8 2020-03-06     2         0.344      0              0
-    ##  9 2020-03-07     6         2.96       0              0
-    ## 10 2020-03-08    13         5.04       0              0
-    ## # … with 145 more rows
-
-``` r
-df_Minnesota <- df_normalized %>% 
-  filter(state == "Florida") %>%
-  select(state, date, cases, cases_per100k, deaths, deaths_per100k) %>% 
-  group_by(date) %>%
-  mutate(
-    cases = sum(cases),
-    cases_per100k = sum(cases_per100k),
-    deaths = sum(deaths),
-    deaths_per100k = sum(deaths_per100k)
-  )
-
-df_normalized %>% 
-  filter(state == "Oregon") %>% 
-  ggplot(aes(x = date)) +
-  geom_area(
-    data = df_Oregon, 
-    mapping = aes(y = cases_per100k)
-  ) +
-  geom_line(
-    mapping = aes(
-      y = cases_per100k, 
-      color = fct_reorder2(county, date, cases_per100k)
-    )
-  ) +
-  # scale_y_log10(labels = scales::label_number_si()) +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Running Death Rate (%) (per 100,000 persons)"
-  )
-```
-
-![](c06-covid19-assignment_files/figure-gfm/q8-state%20to%20county-1.png)<!-- -->
-
-``` r
-## THIS CODE SNIPPET IS ALMOST IDENTICAL TO CODE SUPPLIED BY ZDR
-
-## TASK: Find the URL for the NYT covid-19 county-level data
-url_masks <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/mask-use/mask-use-by-county.csv"
-
-## NOTE: No need to change this; just execute
-## Set the filename of the data to download
-filename_masks <- "./data/nyt_masks.csv"
-
-## Download the data locally
-curl::curl_download(
-        url_masks,
-        destfile = filename_masks
-      )
-
-## Loads the downloaded csv
-df_masks <- read_csv(filename_masks)
-```
+<!-- end list -->
 
     ## Parsed with column specification:
     ## cols(
@@ -911,80 +893,14 @@ df_masks <- read_csv(filename_masks)
     ##   ALWAYS = col_double()
     ## )
 
-``` r
-my_counties_masks_result <- df_q8 %>% 
-  filter(
-    fips == counties 
-    &
-    between(date, as.Date("2020-06-30"), as.Date("2020-07-30"))
-  ) %>%
-  group_by(fips) %>%
-  mutate(max_date = max(ymd(date))) %>% 
-  filter(date == max_date) %>% 
-  left_join(
-    df_masks, 
-    by = c("fips" = "COUNTYFP")
-  ) %>% 
-  unite(
-    "location", 
-    c("county", "state"), 
-    sep = ", ", 
-    remove = FALSE
-  ) 
-```
-
-    ## Warning in fips == counties: longer object length is not a multiple of shorter
-    ## object length
-
-``` r
-my_counties_masks_result_pivot <- my_counties_masks_result %>% 
-  pivot_longer(
-    cols = c(NEVER, RARELY, SOMETIMES, FREQUENTLY, ALWAYS),
-    names_to = "response",
-    values_to = "prop"
-  )
-
-my_counties_masks_result_pivot
-```
-
-    ## # A tibble: 40 x 13
-    ## # Groups:   fips [8]
-    ##    date       location county state fips  cases deaths population cases_per100k
-    ##    <date>     <chr>    <chr>  <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
-    ##  1 2020-07-19 Escambi… Escam… Flor… 12033  5765     58     311522         1851.
-    ##  2 2020-07-19 Escambi… Escam… Flor… 12033  5765     58     311522         1851.
-    ##  3 2020-07-19 Escambi… Escam… Flor… 12033  5765     58     311522         1851.
-    ##  4 2020-07-19 Escambi… Escam… Flor… 12033  5765     58     311522         1851.
-    ##  5 2020-07-19 Escambi… Escam… Flor… 12033  5765     58     311522         1851.
-    ##  6 2020-07-25 Olmsted… Olmst… Minn… 27109  1497     21     153065          978.
-    ##  7 2020-07-25 Olmsted… Olmst… Minn… 27109  1497     21     153065          978.
-    ##  8 2020-07-25 Olmsted… Olmst… Minn… 27109  1497     21     153065          978.
-    ##  9 2020-07-25 Olmsted… Olmst… Minn… 27109  1497     21     153065          978.
-    ## 10 2020-07-25 Olmsted… Olmst… Minn… 27109  1497     21     153065          978.
-    ## # … with 30 more rows, and 4 more variables: deaths_per100k <dbl>,
-    ## #   max_date <date>, response <chr>, prop <dbl>
-
-``` r
-my_counties_masks_result_pivot %>%
-  ggplot(
-    aes(response, fill = fct_reorder2(state, county, cases_per100k))
-  ) +
-  geom_bar() +
-  scale_color_discrete(name = "County") +
-  theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Cases (per 100,000 persons)"
-  )
-```
-
-![](c06-covid19-assignment_files/figure-gfm/q8-masks-1.png)<!-- -->
-
 **Group Project Section**
 
-Based on discussions with my team, we subselected some counties that
+Based on discussions with my team, we sub-selected some counties that
 told a compelling and personal story informed by data and our personal
 experiences.
+
+Our conclusions are presented in the presentation and I am tired so I’m
+not going to do a write-up for this right now.
 
 *Codes of group interest:* \* Hennepin county: 27053 \* Carver county :
 27019 \* Wake county: 37183 \* Durham county: 37063 \* Orleans county:
@@ -992,17 +908,19 @@ experiences.
 
 ``` r
 #So that everyone can run this code snippet
-df_q8 <- df_normalized 
+df_q8_group <- df_normalized %>% 
+  mutate(death_rate_per100k = deaths_per100k/cases_per100k*100) %>% 
+  arrange(fips, date) %>% 
+  unite(col = "location", county, state, sep = ", ", remove = FALSE)
 
 #Counties of interest
 final_counties <- c(27053, 27019, 37183, 37063, 22071, 22103)
 
-#Running Total and Ratio calculations
-df_final_counties <- df_q8 %>%
-  unite(col = "location", county, state, sep = ", ", remove = FALSE) %>% 
-  filter(fips == final_counties) %>%
+#Preparing the data
+df_final_counties <- df_q8_group %>%
+  filter(fips %in%  final_counties) %>%
   group_by(fips) %>% 
-  mutate(deathratio_per100k = deaths_per100k/cases_per100k) %>%
+  mutate(deathratio_per100k = death_rate_per100k/100) %>%
   ungroup() %>%
   group_by(state) %>%
   mutate(state_max_cases_per100k = max(cases_per100k))
@@ -1087,33 +1005,7 @@ df_census <- df_final_counties %>%
   mutate(death_ratio = deaths_per100k/cases_per100k) %>% 
   ungroup()
 
-df_census
-```
 
-    ## # A tibble: 6 x 41
-    ##   date       county location state fips  cases deaths population cases_per100k
-    ##   <date>     <chr>  <chr>    <chr> <chr> <dbl>  <dbl>      <dbl>         <dbl>
-    ## 1 2020-07-29 Orlea… Orleans… Loui… 22071 10120    559     389648         2597.
-    ## 2 2020-07-30 Wake   Wake, N… Nort… 37183 10767    126    1046558         1029.
-    ## 3 2020-07-31 St. T… St. Tam… Loui… 22103  4621    201     252093         1833.
-    ## 4 2020-07-31 Carver Carver,… Minn… 27019   744      2     100416          741.
-    ## 5 2020-07-31 Henne… Hennepi… Minn… 27053 17316    813    1235478         1402.
-    ## 6 2020-07-31 Durham Durham,… Nort… 37063  5789     77     306457         1889.
-    ## # … with 32 more variables: deaths_per100k <dbl>, deathratio_per100k <dbl>,
-    ## #   state_max_cases_per100k <dbl>, Location <chr>,
-    ## #   `Population_07/01/2019` <dbl>, `Population_04/01/2019` <dbl>,
-    ## #   age_under5 <dbl>, `age<18` <dbl>, age_over65 <dbl>, female <dbl>,
-    ## #   white <dbl>, black_african_american <dbl>,
-    ## #   `american-indian_native-alaskan` <dbl>, asian <dbl>,
-    ## #   `hawaiian-pacific_islander` <dbl>, two_races <dbl>,
-    ## #   `hispanic-latino` <dbl>, `white-alone` <dbl>, foreign <dbl>, housing <dbl>,
-    ## #   owns_house <dbl>, median_house_value <dbl>, median_costs_mortgage <dbl>,
-    ## #   median_costs_no_mortgage <dbl>, median_rent <dbl>,
-    ## #   disability_under65 <dbl>, no_health_insurance_under65 <dbl>,
-    ## #   median_household_income <dbl>, per_capita_income <dbl>, poverty <dbl>,
-    ## #   population_density <dbl>, death_ratio <dbl>
-
-``` r
 df_census %>% 
   ggplot(
     aes(x = age_over65, 
@@ -1350,7 +1242,7 @@ df_normalized %>%
   )
 ```
 
-    ## Warning: Removed 138 row(s) containing missing values (geom_path).
+    ## Warning: Removed 139 row(s) containing missing values (geom_path).
 
 ![](c06-covid19-assignment_files/figure-gfm/ma-example-1.png)<!-- -->
 
