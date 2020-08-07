@@ -599,4 +599,24 @@ df_food_pop_totals %>%
 
 ```
 
-Because the USA consumes more beef, it has much higher emmissions. 
+Because the USA consumes more beef, it has much higher emissions. 
+
+```{r BRIC-U}
+df_BRICU_percents <- df_percents %>% 
+  filter(country %in% c("United States", "Brazil", "Russia", "India", "China")) %>% 
+  select(
+    country,
+    food_category,
+    percent_diet
+  ) %>%
+  ggplot() +
+  geom_col(
+    aes(
+      x = country,
+      y = percent_diet,
+      fill = food_category
+    )
+  )
+
+df_BRICU_percents
+```
