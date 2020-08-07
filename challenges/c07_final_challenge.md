@@ -777,4 +777,26 @@ df_food_pop_totals %>%
 
 ![](c07_final_challenge_files/figure-gfm/USA%20and%20Maldives%20totals-2.png)<!-- -->
 
-Because the USA consumes more beef, it has much higher emmissions.
+Because the USA consumes more beef, it has much higher emissions.
+
+``` r
+df_BRICU_percents <- df_percents %>% 
+  filter(country %in% c("United States", "Brazil", "Russia", "India", "China")) %>% 
+  select(
+    country,
+    food_category,
+    percent_diet
+  ) %>%
+  ggplot() +
+  geom_col(
+    aes(
+      x = country,
+      y = percent_diet,
+      fill = food_category
+    )
+  )
+
+df_BRICU_percents
+```
+
+![](c07_final_challenge_files/figure-gfm/BRIC-U-1.png)<!-- -->
