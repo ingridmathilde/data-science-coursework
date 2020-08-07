@@ -506,7 +506,42 @@ df_percents %>%
   facet_wrap(.~region)
 ```
 
-![](c07_final_challenge_files/figure-gfm/most%20eaten%20foods-1.png)<!-- -->
+![](c07_final_challenge_files/figure-gfm/precent%20diet%20by%20region%20and%20income%20group-1.png)<!-- -->
+
+``` r
+df_percents %>%
+  ggplot() +
+  geom_boxplot(
+    aes(
+      x = percent_diet,
+      y = reorder(food_category, percent_diet, median)
+    )
+  ) +
+  facet_wrap(.~income_grp)
+```
+
+![](c07_final_challenge_files/figure-gfm/precent%20diet%20by%20region%20and%20income%20group-2.png)<!-- -->
+
+Top 3 by percent diet by region:
+
+  - East Asia & Pacific: Rice, Wheat, Milk & Cheese
+  - Europe & Central Asia: Milk & Cheese, Wheat, Pork
+  - Latin America & Caribbean: Milk & Cheese, Wheat, Poultry
+  - Middle East & North Africa: Wheat, Milk & Cheese, Rice
+  - North America: Milk & Cheese, Wheat, Poultry
+  - South Asia: Rice, Milk & Cheese, Wheat
+  - Sub-Saharan Africa: Wheat, Milk & Cheese, Rice
+  - NA: Milk & Cheese, Wheat, Poultry
+
+Top 3 percent diet by income group:
+
+  - High income: Milk & Cheese, Wheat, Pork
+  - Low income: Rice, Wheat, Milk & Cheese
+  - Lower middle income: Wheat, Milk & Cheese, Rice
+  - Upper middle income: Milk & Cheese, Wheat, Poultry
+  - NA: Milk & Cheese, Wheat, Poultry
+
+<!-- end list -->
 
 ``` r
 df_percents %>%
@@ -520,32 +555,7 @@ df_percents %>%
   facet_wrap(.~region)
 ```
 
-![](c07_final_challenge_files/figure-gfm/most%20eaten%20foods-2.png)<!-- -->
-
-``` r
-df_percents %>%
-  ggplot() +
-  geom_boxplot(
-    aes(
-      x = percent_diet,
-      y = food_category
-    )
-  ) +
-  facet_wrap(.~income_grp)
-```
-
-![](c07_final_challenge_files/figure-gfm/most%20eaten%20foods-3.png)<!-- -->
-
-Top foods by region:
-
-  - East Asia & Pacific: Rice
-  - Europe & Central Asia: Milk & Cheese
-  - Latin America & Caribbean: Milk & Cheese
-  - Middle East & North Africa: Wheat
-  - North America: Milk & Cheese
-  - South Asia: Rice
-  - Sub-Saharan Africa: Wheat
-  - NA: Milk & Cheese
+![](c07_final_challenge_files/figure-gfm/percent%20co2%20emissions-1.png)<!-- -->
 
 Top Food Emissions by region (I predict beef…):
 
@@ -558,17 +568,8 @@ Top Food Emissions by region (I predict beef…):
   - Sub-Saharan Africa: Beef
   - NA: Beef
 
-That was sort of boring.
-
-Top foods by income group:
-
-  - High income: Milk & Cheese
-  - Low income: Rice
-  - Lower middle income: Wheat
-  - Upper middle income: Milk & Cheese
-  - NA: Milk & Cheese
-
-Beef was the top when mapping co2 emissions vs income group.
+That was sort of boring.Beef was the top when mapping co2 emissions vs
+income group.
 
 ``` r
 total_co2_outliers <- df_food_pop_totals %>% 
@@ -604,3 +605,176 @@ df_food_pop_totals %>%
 Finland is the only outlier here with well above the median milk
 consumption per capita. But this is sort of boring because we all know
 Northern Europe drinks a lot of milk…
+
+``` r
+group_width <- 50
+
+consumption_groups <- df_food_pop_totals %>% 
+  select(
+    country,
+    region,
+    income_grp,
+    population,
+    food_consumption_country,
+    co2_food_country
+  ) %>% 
+  distinct() %>% 
+  mutate(
+    food_consumption_group = cut_width(food_consumption_country, group_width)
+  )
+
+consumption_group_outliers <- consumption_groups %>% 
+  group_by(food_consumption_group) %>%
+  mutate(
+    IQRange = IQR(co2_food_country, na.rm = TRUE),
+    lower = quantile(co2_food_country, 0.25, na.rm = TRUE) - 1.5 * IQR(co2_food_country, na.rm = TRUE),
+    upper = quantile(co2_food_country, 0.75, na.rm = TRUE) + 1.5 * IQR(co2_food_country, na.rm = TRUE)
+  ) %>% 
+  ungroup() %>% 
+  filter(upper < co2_food_country | co2_food_country < lower)
+
+
+df_food_pop_totals %>% 
+  ggplot() +
+  geom_point(
+    aes(
+      x = food_consumption_country,
+      y = co2_food_country,
+      color = income_grp
+    )
+  ) +
+  labs(
+    title = "CO2 emissions per capita as a function of Consumption per capita",
+    x = "Total Food Consumption per capita (kg/person/year)",
+    y = "Total Food-Related CO2 Emissions per capita (kg/per/year)",
+    color = "Income Group"
+  )
+```
+
+![](c07_final_challenge_files/figure-gfm/total%20food%20consumption-1.png)<!-- -->
+
+``` r
+df_food_pop_totals %>% 
+  ggplot(
+    aes(
+      x = food_consumption_country,
+      y = co2_food_country,
+      group = cut_width(food_consumption_country, group_width)
+    )
+  ) +
+  geom_boxplot(
+    outlier.color = "red" 
+  ) +
+  geom_label_repel(
+    data = consumption_group_outliers,
+    mapping = aes(
+      label = country,
+      color = income_grp
+    )
+  ) +
+  labs(
+    title = "CO2 emissions per capita as a function of Consumption per capita",
+    x = "Total Food Consumption per capita\n (kg/person/year)",
+    y = "Total Food-Related CO2 Emissions per capita\n (kg/per/year)",
+    color = "Income Group"
+  )
+```
+
+![](c07_final_challenge_files/figure-gfm/total%20food%20consumption-2.png)<!-- -->
+
+So no shit, but food consumption is directly correlated to CO2
+emissions… cool. When broken down by consumption, there are a few
+outliers aka places where they consume similar total food
+(kg/person/year) but do not produce as much CO2 (kg/person/year) - I
+predict this is dictated by the breakdown of the foods they eat. What
+jumps out to me as interesting is the contrast between the United States
+and Maldives - they are in the same range for total food consumption but
+have vastly different CO2 emissions - how different are they in terms of
+dietary breakdown? I predict that the United States eats way more beef.
+
+``` r
+df_percents %>% 
+  filter(country %in% c("United States", "Maldives")) %>% 
+  select(
+    country,
+    food_category,
+    percent_diet
+  ) %>% 
+  ggplot() +
+  geom_col(
+    aes(
+      x = country,
+      y = percent_diet,
+      fill = food_category
+    )
+  )
+```
+
+![](c07_final_challenge_files/figure-gfm/USA%20and%20Maldives%20percents-1.png)<!-- -->
+
+``` r
+df_percents %>% 
+  filter(country %in% c("United States", "Maldives")) %>% 
+  select(
+    country,
+    food_category,
+    percent_co2,
+    percent_diet
+  ) %>% 
+  ggplot() +
+  geom_col(
+    aes(
+      x = country,
+      y = percent_co2,
+      fill = food_category
+    )
+  )
+```
+
+![](c07_final_challenge_files/figure-gfm/USA%20and%20Maldives%20percents-2.png)<!-- -->
+
+Overall, the United States eats more red meat while Maldives eats more
+fish and rice. These are the main contributors to having vastly higher
+CO2 emmissions.
+
+``` r
+df_food_pop_totals %>% 
+  filter(country %in% c("United States", "Maldives")) %>% 
+  select(
+    country,
+    food_category,
+    consumption
+  ) %>% 
+  ggplot() +
+  geom_col(
+    aes(
+      x = country,
+      y = consumption,
+      fill = food_category
+    )
+  )
+```
+
+![](c07_final_challenge_files/figure-gfm/USA%20and%20Maldives%20totals-1.png)<!-- -->
+
+``` r
+df_food_pop_totals %>% 
+  filter(country %in% c("United States", "Maldives")) %>% 
+  select(
+    country,
+    food_category,
+    co2_emmission
+  ) %>% 
+  ggplot() +
+  geom_col(
+    aes(
+      x = country,
+      y = co2_emmission,
+      fill = food_category
+    )
+  )
+```
+
+![](c07_final_challenge_files/figure-gfm/USA%20and%20Maldives%20totals-2.png)<!-- -->
+
+Because the USA consumes more beef, it has much higher emmissions.
