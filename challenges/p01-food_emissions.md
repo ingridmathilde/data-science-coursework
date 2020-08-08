@@ -69,6 +69,7 @@ library(tidyverse)
 ``` r
 library(gapminder)
 library(ggrepel)
+library(wesanderson)
 ```
 
 ``` r
@@ -212,7 +213,7 @@ df_food_high_income <- df_food_all %>%
 ```
 
 ``` r
-group_width <- 50
+group_width <- 100
 
 high_income_groups <- df_food_high_income %>% 
   select(
@@ -238,38 +239,34 @@ high_income_group_outliers <- high_income_groups %>%
   ungroup() %>% 
   filter(upper < co2_food_country | co2_food_country < lower)
 
-high_income_beef <- df_food_high_income %>% 
-  filter(food_category == "Beef")
-
 high_income_groups %>% 
   ggplot(
     aes(
-      x = food_consumption_country,
-      y = co2_food_country,
-      group = cut_width(food_consumption_country, group_width)
+      x = food_consumption_group,
+      y = co2_food_country
     )
   ) +
-  geom_boxplot(
-    outlier.color = "red" 
-  ) +
-  geom_label_repel(
-    data = high_income_group_outliers,
-    mapping = aes(
-      label = country,
-      color = income_grp
-    )
-  ) +
+  geom_boxplot() +
   labs(
-    title = "CO2 emissions per capita as a function of Consumption per capita",
-    x = "Total Food Consumption per capita\n (kg/person/year)",
-    y = "Total Food-Related CO2 Emissions per capita\n (kg/per/year)",
-    color = "Income Group"
-  )
+     title = "Animal and Aminal Byproduct-Related CO2 emissions \ncorrelates with Consumption of said Foods",
+    subtitle = "For High Income Countries",
+    x = "Consumption per capita\n (kg/person/year)",
+    y = "CO2 Emissions per capita\n (kg/per/year)",
+    color = "Beef as Percent\n of Animal Diet (%)"
+  ) +
+  theme(plot.title = element_text(face = "bold")) +
+  scale_color_manual(values=wes_palette(n=4, name="Darjeeling1")) 
 ```
 
 ![](p01-food_emissions_files/figure-gfm/and%20some%20final%20plots-1.png)<!-- -->
 
 ``` r
+high_income_beef <- df_food_high_income %>% 
+  filter(food_category == "Beef") %>% 
+  mutate(
+    beef_group = cut_width(percent_diet*100,4, boundary = 0)
+  )
+
 high_income_groups %>% 
   ggplot(
     aes(
@@ -279,15 +276,91 @@ high_income_groups %>%
   ) +
   geom_point(
     aes(
-      alpha = high_income_beef$percent_diet
+      color = high_income_beef$beef_group
     )
   ) +
   labs(
-    title = "CO2 emissions per capita as a function of Consumption per capita",
-    x = "Total Food Consumption per capita\n (kg/person/year)",
-    y = "Total Food-Related CO2 Emissions per capita\n (kg/per/year)",
-    color = "Income Group"
-  )
+    title = "Countries that consume more beef tend to produce\n more CO2 emissions",
+    subtitle = "For High Income Countries",
+    x = "Animal (and Byproduct) Consumption per capita\n (kg/person/year)",
+    y = "Animal (and Byproduct) Related-CO2 Emissions\n per capita\n (kg/per/year)",
+    color = "Beef as Percent\n of Animal Diet (%)"
+  ) +
+  theme(plot.title = element_text(face = "bold")) +
+  scale_color_manual(values=wes_palette(n=4, name="Darjeeling1")) 
 ```
 
-![](p01-food_emissions_files/figure-gfm/and%20some%20final%20plots-2.png)<!-- -->
+![](p01-food_emissions_files/figure-gfm/beef%20eaters-1.png)<!-- -->
+
+``` r
+df_companion_countries <- df_food_high_income %>% 
+  mutate(
+    food_consumption_group = cut_width(food_consumption_country, group_width)
+  ) %>% 
+  filter(food_consumption_group == "(350,450]")
+
+df_companion_countries
+```
+
+    ## # A tibble: 105 x 12
+    ##    country food_category consumption co2_emmission population region income_grp
+    ##    <chr>   <chr>               <dbl>         <dbl>      <dbl> <chr>  <chr>     
+    ##  1 Austra… Pork                24.1          85.4    23600000 East … High inco…
+    ##  2 Austra… Poultry             46.1          49.5    23600000 East … High inco…
+    ##  3 Austra… Beef                33.9        1045.     23600000 East … High inco…
+    ##  4 Austra… Lamb & Goat          9.87        346.     23600000 East … High inco…
+    ##  5 Austra… Fish                17.7          28.2    23600000 East … High inco…
+    ##  6 Austra… Eggs                 8.51          7.82   23600000 East … High inco…
+    ##  7 Austra… Milk - inc. …      234.          334.     23600000 East … High inco…
+    ##  8 Iceland Pork                21.7          76.8      329000 Europ… High inco…
+    ##  9 Iceland Poultry             26.9          28.9      329000 Europ… High inco…
+    ## 10 Iceland Beef                13.4         412.       329000 Europ… High inco…
+    ## # … with 95 more rows, and 5 more variables: co2_food_country <dbl>,
+    ## #   food_consumption_country <dbl>, percent_diet <dbl>, percent_co2 <dbl>,
+    ## #   food_consumption_group <fct>
+
+``` r
+df_companion_countries %>% 
+  ggplot() +
+  geom_col(
+    aes(
+      y = reorder(country, co2_food_country),
+      x = percent_diet,
+      fill = food_category
+    )
+  ) +
+  labs(
+    title = "Milk and Cheese is a major food group!",
+    subtitle = "For High Income Countries",
+    x = "Percentage of Diet (%)",
+    y = "Country",
+    color = "Animal or Animal Byproduct"
+  ) +
+  theme(plot.title = element_text(face = "bold")) +
+  scale_color_manual(values=wes_palette(n=4, name="Darjeeling1")) 
+```
+
+![](p01-food_emissions_files/figure-gfm/countries%20to%20emulate-1.png)<!-- -->
+
+``` r
+df_companion_countries %>% 
+  ggplot() +
+  geom_col(
+    aes(
+      y = reorder(country, co2_food_country),
+      x = co2_emmission,
+      fill = food_category
+    )
+  )+
+  labs(
+    title = "Beef, Lamb, and Goat are major CO2 emittors",
+    subtitle = "For High Income Countries",
+    x = "CO2 Emissions (kg/person/year)",
+    y = "Country",
+    color = "Animal or Animal Byproduct"
+  ) +
+  theme(plot.title = element_text(face = "bold")) +
+  scale_color_manual(values=wes_palette(n=4, name="Darjeeling1")) 
+```
+
+![](p01-food_emissions_files/figure-gfm/countries%20to%20emulate-2.png)<!-- -->

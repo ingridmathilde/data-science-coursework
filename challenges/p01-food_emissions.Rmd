@@ -45,6 +45,7 @@ All the deliverables stated in the rubrics above are due on the day of the class
 library(tidyverse)
 library(gapminder)
 library(ggrepel)
+library(wesanderson)
 ```
 
 
@@ -153,7 +154,7 @@ df_food_high_income <- df_food_all %>%
 ```
 
 ```{r and some final plots}
-group_width <- 50
+group_width <- 100
 
 high_income_groups <- df_food_high_income %>% 
   select(
@@ -179,32 +180,31 @@ high_income_group_outliers <- high_income_groups %>%
   ungroup() %>% 
   filter(upper < co2_food_country | co2_food_country < lower)
 
-high_income_beef <- df_food_high_income %>% 
-  filter(food_category == "Beef")
-
 high_income_groups %>% 
   ggplot(
     aes(
-      x = food_consumption_country,
-      y = co2_food_country,
-      group = cut_width(food_consumption_country, group_width)
+      x = food_consumption_group,
+      y = co2_food_country
     )
   ) +
-  geom_boxplot(
-    outlier.color = "red" 
-  ) +
-  geom_label_repel(
-    data = high_income_group_outliers,
-    mapping = aes(
-      label = country,
-      color = income_grp
-    )
-  ) +
+  geom_boxplot() +
   labs(
-    title = "CO2 emissions per capita as a function of Consumption per capita",
-    x = "Total Food Consumption per capita\n (kg/person/year)",
-    y = "Total Food-Related CO2 Emissions per capita\n (kg/per/year)",
-    color = "Income Group"
+     title = "Animal and Aminal Byproduct-Related CO2 emissions \ncorrelates with Consumption of said Foods",
+    subtitle = "For High Income Countries",
+    x = "Consumption per capita\n (kg/person/year)",
+    y = "CO2 Emissions per capita\n (kg/per/year)",
+    color = "Beef as Percent\n of Animal Diet (%)"
+  ) +
+  theme(plot.title = element_text(face = "bold")) +
+  scale_color_manual(values=wes_palette(n=4, name="Darjeeling1")) 
+
+```
+
+```{r beef eaters}
+high_income_beef <- df_food_high_income %>% 
+  filter(food_category == "Beef") %>% 
+  mutate(
+    beef_group = cut_width(percent_diet*100,4, boundary = 0)
   )
 
 high_income_groups %>% 
@@ -216,14 +216,64 @@ high_income_groups %>%
   ) +
   geom_point(
     aes(
-      alpha = high_income_beef$percent_diet
+      color = high_income_beef$beef_group
     )
   ) +
   labs(
-    title = "CO2 emissions per capita as a function of Consumption per capita",
-    x = "Total Food Consumption per capita\n (kg/person/year)",
-    y = "Total Food-Related CO2 Emissions per capita\n (kg/per/year)",
-    color = "Income Group"
-  )
+    title = "Countries that consume more beef tend to produce\n more CO2 emissions",
+    subtitle = "For High Income Countries",
+    x = "Animal (and Byproduct) Consumption per capita\n (kg/person/year)",
+    y = "Animal (and Byproduct) Related-CO2 Emissions\n per capita\n (kg/per/year)",
+    color = "Beef as Percent\n of Animal Diet (%)"
+  ) +
+  theme(plot.title = element_text(face = "bold")) +
+  scale_color_manual(values=wes_palette(n=4, name="Darjeeling1")) 
+```
 
+```{r countries to emulate}
+df_companion_countries <- df_food_high_income %>% 
+  mutate(
+    food_consumption_group = cut_width(food_consumption_country, group_width)
+  ) %>% 
+  filter(food_consumption_group == "(350,450]")
+
+df_companion_countries
+
+df_companion_countries %>% 
+  ggplot() +
+  geom_col(
+    aes(
+      y = reorder(country, co2_food_country),
+      x = percent_diet,
+      fill = food_category
+    )
+  ) +
+  labs(
+    title = "Milk and Cheese is a major food group!",
+    subtitle = "For High Income Countries",
+    x = "Percentage of Diet (%)",
+    y = "Country",
+    color = "Animal or Animal Byproduct"
+  ) +
+  theme(plot.title = element_text(face = "bold")) +
+  scale_color_manual(values=wes_palette(n=4, name="Darjeeling1")) 
+
+df_companion_countries %>% 
+  ggplot() +
+  geom_col(
+    aes(
+      y = reorder(country, co2_food_country),
+      x = co2_emmission,
+      fill = food_category
+    )
+  )+
+  labs(
+    title = "Beef, Lamb, and Goat are major CO2 emittors",
+    subtitle = "For High Income Countries",
+    x = "CO2 Emissions (kg/person/year)",
+    y = "Country",
+    color = "Animal or Animal Byproduct"
+  ) +
+  theme(plot.title = element_text(face = "bold")) +
+  scale_color_manual(values=wes_palette(n=4, name="Darjeeling1")) 
 ```
