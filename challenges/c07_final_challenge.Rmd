@@ -620,3 +620,186 @@ df_BRICU_percents <- df_percents %>%
 
 df_BRICU_percents
 ```
+
+```{r high income}
+df_high_income_percent <- df_percents %>% 
+  filter(income_grp == "High income") %>% 
+  filter()
+
+df_high_income_totals <- df_food_pop_totals  %>% 
+  filter(income_grp == "High income")
+
+df_high_income_percent
+df_high_income_totals
+
+group_width <- 50
+
+high_income_consumption_groups <- df_high_income_totals %>% 
+  select(
+    country,
+    region,
+    income_grp,
+    population,
+    food_consumption_country,
+    co2_food_country
+  ) %>% 
+  distinct() %>% 
+  mutate(
+    food_consumption_group = cut_width(food_consumption_country, group_width)
+  )
+
+high_income_consumption_group_outliers <- high_income_consumption_groups %>% 
+  group_by(food_consumption_group) %>%
+  mutate(
+    IQRange = IQR(co2_food_country, na.rm = TRUE),
+    lower = quantile(co2_food_country, 0.25, na.rm = TRUE) - 1.5 * IQR(co2_food_country, na.rm = TRUE),
+    upper = quantile(co2_food_country, 0.75, na.rm = TRUE) + 1.5 * IQR(co2_food_country, na.rm = TRUE)
+  ) %>% 
+  ungroup() %>% 
+  filter(upper < co2_food_country | co2_food_country < lower)
+
+high_income_consumption_groups %>% 
+  ggplot(
+    aes(
+      x = food_consumption_country,
+      y = co2_food_country,
+      group = cut_width(food_consumption_country, group_width)
+    )
+  ) +
+  geom_boxplot(
+    outlier.color = "red" 
+  ) +
+  geom_label_repel(
+    data = high_income_consumption_group_outliers,
+    mapping = aes(
+      label = country,
+      color = income_grp
+    )
+  ) +
+  labs(
+    title = "CO2 emissions per capita as a function of Consumption per capita",
+    x = "Total Food Consumption per capita\n (kg/person/year)",
+    y = "Total Food-Related CO2 Emissions per capita\n (kg/per/year)",
+    color = "Income Group"
+  )
+
+high_income_consumption_groups %>% 
+  ggplot(
+    aes(
+      x = food_consumption_country,
+      y = co2_food_country,
+      group = cut_width(food_consumption_country, group_width)
+    )
+  ) +
+  geom_point() +
+  labs(
+    title = "CO2 emissions per capita as a function of Consumption per capita",
+    x = "Total Food Consumption per capita\n (kg/person/year)",
+    y = "Total Food-Related CO2 Emissions per capita\n (kg/per/year)",
+    color = "Income Group"
+  )
+
+high_income_consumption_groups %>% 
+  filter(food_consumption_country >500 & co2_food_country < 1000)
+
+high_income_consumption_groups %>% 
+  filter(food_consumption_country >400 & co2_food_country < 1000)
+
+```
+
+```{r final data set}
+df_food_all <-
+  food_consumption_mod %>%
+  left_join(gapminder_pop_2014, by = "country") %>%
+  left_join(gapminder_geo_select, by = "country") %>%
+  filter(food_category %in% c("Beef", "Fish", "Lamb & Goat", "Pork", "Poultry", "Eggs", "Milk - inc. cheese")) %>% 
+  group_by(country) %>%
+  mutate(
+    co2_food_country = sum(co2_emmission), 
+    food_consumption_country = sum(consumption)
+  ) %>%
+  ungroup() %>% 
+  mutate(
+    percent_diet = consumption/food_consumption_country,
+    percent_co2 = co2_emmission/co2_food_country
+  )
+
+df_food_high_income <- df_food_all %>% 
+  filter(income_grp == "High income")
+```
+
+```{r and some final plots}
+group_width <- 50
+
+high_income_groups <- df_food_high_income %>% 
+  select(
+    country,
+    region,
+    income_grp,
+    population,
+    food_consumption_country,
+    co2_food_country
+  ) %>% 
+  distinct() %>% 
+  mutate(
+    food_consumption_group = cut_width(food_consumption_country, group_width)
+  )
+
+high_income_group_outliers <- high_income_groups %>% 
+  group_by(food_consumption_group) %>%
+  mutate(
+    IQRange = IQR(co2_food_country, na.rm = TRUE),
+    lower = quantile(co2_food_country, 0.25, na.rm = TRUE) - 1.5 * IQR(co2_food_country, na.rm = TRUE),
+    upper = quantile(co2_food_country, 0.75, na.rm = TRUE) + 1.5 * IQR(co2_food_country, na.rm = TRUE)
+  ) %>% 
+  ungroup() %>% 
+  filter(upper < co2_food_country | co2_food_country < lower)
+
+high_income_beef <- df_food_high_income %>% 
+  filter(food_category == "Beef")
+
+high_income_groups %>% 
+  ggplot(
+    aes(
+      x = food_consumption_country,
+      y = co2_food_country,
+      group = cut_width(food_consumption_country, group_width)
+    )
+  ) +
+  geom_boxplot(
+    outlier.color = "red" 
+  ) +
+  geom_label_repel(
+    data = high_income_group_outliers,
+    mapping = aes(
+      label = country,
+      color = income_grp
+    )
+  ) +
+  labs(
+    title = "CO2 emissions per capita as a function of Consumption per capita",
+    x = "Total Food Consumption per capita\n (kg/person/year)",
+    y = "Total Food-Related CO2 Emissions per capita\n (kg/per/year)",
+    color = "Income Group"
+  )
+
+high_income_groups %>% 
+  ggplot(
+    aes(
+      x = food_consumption_country,
+      y = co2_food_country,
+    )
+  ) +
+  geom_point(
+    aes(
+      alpha = high_income_beef$percent_diet
+    )
+  ) +
+  labs(
+    title = "CO2 emissions per capita as a function of Consumption per capita",
+    x = "Total Food Consumption per capita\n (kg/person/year)",
+    y = "Total Food-Related CO2 Emissions per capita\n (kg/per/year)",
+    color = "Income Group"
+  )
+
+```
